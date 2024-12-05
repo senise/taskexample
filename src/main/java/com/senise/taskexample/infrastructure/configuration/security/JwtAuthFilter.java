@@ -1,5 +1,6 @@
 package com.senise.taskexample.infrastructure.configuration.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,25 +31,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         final String authorizationHeader = request.getHeader("Authorization");
-        final String jwtToken;
-        final String email;
-
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwtToken = authorizationHeader.substring(7);
-        email = jwtService.extractEmail(jwtToken);
-
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-            if (jwtService.validateToken(jwtToken, userDetails)) {
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        final String jwtToken = authorizationHeader.substring(7).trim(); // Corregido: trim para evitar caracteres extraños
+        try {
+            final String email = jwtService.extractEmail(jwtToken);
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                if (jwtService.validateToken(jwtToken, userDetails)) {
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }
             }
+        } catch (JwtException e) {
+            // Loguear o manejar el error si el token no es válido
+            System.err.println("Token inválido: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);

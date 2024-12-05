@@ -2,6 +2,7 @@ package com.senise.taskexample.application.service.impl;
 
 import com.senise.taskexample.application.dto.request.LoginRequest;
 import com.senise.taskexample.application.dto.request.UserRequestDTO;
+import com.senise.taskexample.application.mapper.UserMapper;
 import com.senise.taskexample.application.service.AuthService;
 import com.senise.taskexample.domain.entity.User;
 import com.senise.taskexample.infrastructure.configuration.security.JwtService;
@@ -21,17 +22,21 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserMapper userMapper;
 
     @Override
     public void register(UserRequestDTO userRequestDTO) {
-        User u = User.builder()
+       /*  User u = User.builder()
                 .email(userRequestDTO.getEmail())
                 .password(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()))
                 .name(userRequestDTO.getName())
                 //.firstName(userRequestDTO.getFirstName())
                 //.lastName(userRequestDTO.getLastName())
-                .build();
-        userRepository.save(u);
+                .build();*/
+
+        User user = userMapper.toEntity(userRequestDTO);
+        user.setPassword(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()));
+        userRepository.save(user);
     }
 
     public String login(LoginRequest loginRequest) {
