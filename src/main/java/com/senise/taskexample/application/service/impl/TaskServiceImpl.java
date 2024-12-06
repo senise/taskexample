@@ -7,10 +7,12 @@ import com.senise.taskexample.application.service.TaskService;
 import com.senise.taskexample.domain.entity.Task;
 import com.senise.taskexample.domain.entity.User;
 import com.senise.taskexample.domain.exception.TaskNotFoundException;
+import com.senise.taskexample.domain.exception.UserNotAuthorizedException;
 import com.senise.taskexample.domain.exception.UserNotFoundException;
 import com.senise.taskexample.infrastructure.respository.TaskRepository;
 import com.senise.taskexample.infrastructure.respository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,20 +29,27 @@ public class TaskServiceImpl implements TaskService {
     /**
      * Crea una nueva tarea.
      */
-    public TaskResponseDTO createTask(TaskRequestDTO taskRequestDTO) {
+    public TaskResponseDTO createTask(TaskRequestDTO taskRequestDTO, Authentication authentication) {
+        // Obtener el usuario de la base de datos por su ID
         User user = userRepository.findById(taskRequestDTO.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
-        Task task = taskMapper.toEntity(taskRequestDTO, user);
-        taskRepository.save(task);
-
-        return taskMapper.toResponseDTO(task);
+        // Verificar si el usuario logueado es el mismo que el de la tarea o si es un administrador
+        if (user.getEmail().equals(authentication.getName()) || isAdmin(authentication)) {
+            // Crear la tarea si el usuario tiene los permisos adecuados
+            Task task = taskMapper.toEntity(taskRequestDTO, user);
+            taskRepository.save(task);
+            return taskMapper.toResponseDTO(task);
+        } else {
+            // Lanzar la excepción si no tiene los permisos adecuados
+            throw new UserNotAuthorizedException("No tienes permisos para crear una tarea para este usuario.");
+        }
     }
 
     /**
      * Obtiene la lista de todas las tareas.
      */
-    public List<TaskResponseDTO> getAllTasks() {
+    public List<TaskResponseDTO> getAllTasks(/*String userMail*/) {
         List<Task> tasks = taskRepository.findAll();
         return tasks.stream()
                 .map(taskMapper::toResponseDTO)
@@ -50,7 +59,7 @@ public class TaskServiceImpl implements TaskService {
     /**
      * Obtiene el detalle de una tarea por su ID.
      */
-    public TaskResponseDTO getTaskById(Long id) {
+    public TaskResponseDTO getTaskById(Long id, String userMail) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Tarea no encontrada"));
 
@@ -60,7 +69,7 @@ public class TaskServiceImpl implements TaskService {
     /**
      * Actualiza una tarea por su ID.
      */
-    public TaskResponseDTO updateTask(Long id, TaskRequestDTO taskRequestDTO) {
+    public TaskResponseDTO updateTask(Long id, TaskRequestDTO taskRequestDTO, String userMail) {
         Task existingTask = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Tarea no encontrada"));
 
@@ -81,7 +90,7 @@ public class TaskServiceImpl implements TaskService {
     /**
      * Elimina una tarea por su ID.
      */
-    public void deleteTask(Long id) {
+    public void deleteTask(Long id, String userMail) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Tarea no encontrada"));
 
@@ -89,10 +98,16 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponseDTO> getTasksByUserId(Long userId) {
+    public List<TaskResponseDTO> getTasksByUserId(Long userId, String userMail) {
         List<Task> tasks = taskRepository.findByUserId(userId);
         return tasks.stream()
                 .map(taskMapper::toResponseDTO)  // Convertir cada tarea a TaskResponseDTO
                 .collect(Collectors.toList());
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        // Verificamos si el usuario tiene el rol de ADMIN
+        return authentication.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
     }
 }

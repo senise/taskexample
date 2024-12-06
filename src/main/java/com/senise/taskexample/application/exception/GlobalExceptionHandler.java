@@ -1,6 +1,7 @@
 package com.senise.taskexample.application.exception;
 
 import com.senise.taskexample.domain.exception.TaskNotFoundException;
+import com.senise.taskexample.domain.exception.UserNotAuthorizedException;
 import com.senise.taskexample.domain.exception.UserNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,11 @@ public class GlobalExceptionHandler {
         } else {
             return new ResponseEntity<>("Violación de restricción de integridad.", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @ExceptionHandler(UserNotAuthorizedException.class)
+    public ResponseEntity<String> handleUserNotAuthorizedException(UserNotAuthorizedException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN); // Respondemos con código 403 y el mensaje de la excepción
     }
 
     // Manejar cualquier otra excepción

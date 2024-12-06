@@ -3,6 +3,7 @@ package com.senise.taskexample.infrastructure.controller;
 import com.senise.taskexample.application.dto.request.TaskRequestDTO;
 import com.senise.taskexample.application.dto.response.TaskResponseDTO;
 import com.senise.taskexample.application.service.TaskService;
+import com.senise.taskexample.infrastructure.configuration.security.UserDetailServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,17 +12,21 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tasks")
+@RequestMapping("/api/v1/tasks")
 @AllArgsConstructor
 @Tag(name = "Tasks", description = "Operaciones relacionadas con las tareas")
 public class TaskController {
 
     private final TaskService taskService;
+    private final UserDetailServiceImpl userDetailsService;
 
     /**
      * Crea una nueva tarea.
@@ -36,13 +41,15 @@ public class TaskController {
     )
     @PostMapping
     public ResponseEntity<TaskResponseDTO> createTask(
-            @RequestBody @Valid @Parameter(description = "Detalles de la tarea que se va a crear") TaskRequestDTO taskRequestDTO) {
-        TaskResponseDTO responseDTO = taskService.createTask(taskRequestDTO);
+            @RequestBody @Valid @Parameter(description = "Detalles de la tarea que se va a crear") TaskRequestDTO taskRequestDTO,
+            Authentication authentication) throws AccessDeniedException {
+        TaskResponseDTO responseDTO = taskService.createTask(taskRequestDTO, authentication);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
     /**
-     * Obtiene la lista de todas las tareas.
+     * Obtiene todas las tareas si el usuario es administrador,
+     * o solo las tareas del usuario logueado si es un usuario normal.
      */
     @Operation(
             summary = "Obtener todas las tareas",
@@ -51,9 +58,10 @@ public class TaskController {
                     @ApiResponse(responseCode = "200", description = "Lista de tareas obtenida con éxito")
             }
     )
+    @PreAuthorize("hasRole('ROLE_ADMIN')")  // Solo para administradores
     @GetMapping
-    public ResponseEntity<List<TaskResponseDTO>> getAllTasks() {
-        List<TaskResponseDTO> tasks = taskService.getAllTasks();
+    public ResponseEntity<List<TaskResponseDTO>> getAllTasks(/*Authentication authentication*/) {
+        List<TaskResponseDTO> tasks = taskService.getAllTasks(/*authentication.getName()*/);
         return ResponseEntity.ok(tasks);
     }
 
@@ -70,8 +78,8 @@ public class TaskController {
     )
     @GetMapping("/{id}")
     public ResponseEntity<TaskResponseDTO> getTaskById(
-            @PathVariable @Parameter(description = "ID de la tarea a obtener") Long id) {
-        TaskResponseDTO task = taskService.getTaskById(id);
+            @PathVariable @Parameter(description = "ID de la tarea a obtener") Long id, Authentication authentication) {
+        TaskResponseDTO task = taskService.getTaskById(id, authentication.getName());
         return ResponseEntity.ok(task);
     }
 
@@ -90,8 +98,9 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponseDTO> updateTask(
             @PathVariable Long id,
-            @RequestBody @Valid @Parameter(description = "Detalles de la tarea a actualizar") TaskRequestDTO taskRequestDTO) {
-        TaskResponseDTO updatedTask = taskService.updateTask(id, taskRequestDTO);
+            @RequestBody @Valid @Parameter(description = "Detalles de la tarea a actualizar") TaskRequestDTO taskRequestDTO,
+            Authentication authentication) {
+        TaskResponseDTO updatedTask = taskService.updateTask(id, taskRequestDTO, authentication.getName());
         return ResponseEntity.ok(updatedTask);
     }
 
@@ -108,8 +117,9 @@ public class TaskController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(
-            @PathVariable @Parameter(description = "ID de la tarea a eliminar") Long id) {
-        taskService.deleteTask(id);
+            @PathVariable @Parameter(description = "ID de la tarea a eliminar") Long id,
+            Authentication authentication) {
+        taskService.deleteTask(id, authentication.getName());
         return ResponseEntity.noContent().build();
     }
 
@@ -127,8 +137,9 @@ public class TaskController {
             }
     )
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<TaskResponseDTO>> getTasksByUserId(@PathVariable Long userId) {
-        List<TaskResponseDTO> tasks = taskService.getTasksByUserId(userId);
+    public ResponseEntity<List<TaskResponseDTO>> getTasksByUserId(@PathVariable Long userId,
+                                                                  Authentication authentication) {
+        List<TaskResponseDTO> tasks = taskService.getTasksByUserId(userId, authentication.getName());
         return ResponseEntity.ok(tasks);
     }
 }

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 
 @Entity
-@Table(name = "users") // Cambia el nombre de la tabla a algo distinto, como "users"
+@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,7 +24,8 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @ManyToOne(fetch = FetchType.EAGER) // Relación ManyToOne
+    @JoinColumn(name = "role_id", nullable = false) // Clave foránea hacia la tabla de roles
+    private Role role; // Un usuario solo tiene un rol
 }
-
-
-

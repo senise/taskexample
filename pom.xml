@@ -11,7 +11,7 @@
     <groupId>com.senise</groupId>
     <artifactId>taskexample</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>taskexample</name>
+    <name>Task Example</name>
     <description>Ejemplo de aplicación de gestión de tareas</description>
     <url/>
     <licenses>
@@ -101,6 +101,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

@@ -39,6 +39,7 @@ public class AuthController {
     @PostMapping(path = "/register")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void register(@RequestBody UserRequestDTO userRequestDTO) {
+        System.out.println(userRequestDTO);  // Para verificar si el objeto se está recibiendo correctamente
         authService.register(userRequestDTO);
     }
 
