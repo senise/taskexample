@@ -26,7 +26,7 @@ public class UserRequestDTO {
     @NotBlank
     private String password;
 
-    //@Schema(description = "Rol del usuario", example = "ROLE_USER", requiredMode = Schema.RequiredMode.REQUIRED)
-    //@NotBlank
-    //private String role;
+    @Schema(description = "Rol del usuario", example = "ROLE_USER", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank
+    private String role;
 }

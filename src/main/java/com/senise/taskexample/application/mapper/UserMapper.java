@@ -2,6 +2,7 @@ package com.senise.taskexample.application.mapper;
 
 import com.senise.taskexample.application.dto.request.UserRequestDTO;
 import com.senise.taskexample.application.dto.response.UserResponseDTO;
+import com.senise.taskexample.domain.entity.Role;
 import com.senise.taskexample.domain.entity.User;
 import com.senise.taskexample.infrastructure.respository.RoleRepository;
 import lombok.AllArgsConstructor;
@@ -20,10 +21,10 @@ public class UserMapper {
         user.setPassword(userRequestDTO.getPassword());
 
         // Obtener el rol desde la base de datos y asignarlo al usuario
-       /* Role role = roleRepository.findByName(userRequestDTO.getRole())
+       Role role = roleRepository.findByName(userRequestDTO.getRole())
                 .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado: " + userRequestDTO.getRole()));
 
-        user.setRole(role); // Asignar un único rol al usuario*/
+        user.setRole(role); // Asignar un único rol al usuario
         return user;
     }
 
@@ -32,6 +33,7 @@ public class UserMapper {
         dto.setEmail(user.getEmail());
         dto.setName(user.getName());
         dto.setId(user.getId());
+        dto.setRole(user.getRole().getName());
         return dto;
     }
 }

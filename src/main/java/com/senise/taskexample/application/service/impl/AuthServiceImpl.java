@@ -2,6 +2,8 @@ package com.senise.taskexample.application.service.impl;
 
 import com.senise.taskexample.application.dto.request.LoginRequest;
 import com.senise.taskexample.application.dto.request.UserRequestDTO;
+import com.senise.taskexample.application.dto.response.TokenResponse;
+import com.senise.taskexample.application.dto.response.UserResponseDTO;
 import com.senise.taskexample.application.mapper.UserMapper;
 import com.senise.taskexample.application.service.AuthService;
 import com.senise.taskexample.domain.entity.User;
@@ -25,7 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
 
     @Override
-    public void register(UserRequestDTO userRequestDTO) {
+    public UserResponseDTO register(UserRequestDTO userRequestDTO) {
        /*  User u = User.builder()
                 .email(userRequestDTO.getEmail())
                 .password(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()))
@@ -37,14 +39,15 @@ public class AuthServiceImpl implements AuthService {
         User user = userMapper.toEntity(userRequestDTO);
         user.setPassword(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()));
         userRepository.save(user);
+        return userMapper.toResponseDTO(user);
     }
 
-    public String login(LoginRequest loginRequest) {
+    public TokenResponse login(LoginRequest loginRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
         User u = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        return jwtService.generateToken(u);
+        return new TokenResponse(jwtService.generateToken(u));
 
     }
 }

@@ -2,19 +2,18 @@ package com.senise.taskexample.infrastructure.controller;
 
 import com.senise.taskexample.application.dto.request.LoginRequest;
 import com.senise.taskexample.application.dto.request.UserRequestDTO;
+import com.senise.taskexample.application.dto.response.TokenResponse;
+import com.senise.taskexample.application.dto.response.UserResponseDTO;
 import com.senise.taskexample.application.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Auth", description = "Operaciones relacionadas con el login de usuario")
 @RestController
@@ -38,9 +37,8 @@ public class AuthController {
     })
     @PostMapping(path = "/register")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void register(@RequestBody UserRequestDTO userRequestDTO) {
-        System.out.println(userRequestDTO);  // Para verificar si el objeto se está recibiendo correctamente
-        authService.register(userRequestDTO);
+    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRequestDTO userRequestDTO) {
+        return ResponseEntity.ok(authService.register(userRequestDTO));
     }
 
     /**
@@ -56,7 +54,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "No autorizado - Credenciales inválidas")
     })
     @PostMapping(path = "/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 }
