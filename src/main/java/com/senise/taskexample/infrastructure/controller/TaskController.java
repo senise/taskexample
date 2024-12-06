@@ -58,9 +58,9 @@ public class TaskController {
                     @ApiResponse(responseCode = "200", description = "Lista de tareas obtenida con éxito")
             }
     )
-    @PreAuthorize("hasRole('ROLE_ADMIN')")  // Solo para administradores
     @GetMapping
-    public ResponseEntity<List<TaskResponseDTO>> getAllTasks(/*Authentication authentication*/) {
+    public ResponseEntity<List<TaskResponseDTO>> getAllTasks(Authentication authentication) {
+        System.out.println("Roles del usuario: " + authentication.getAuthorities());
         List<TaskResponseDTO> tasks = taskService.getAllTasks(/*authentication.getName()*/);
         return ResponseEntity.ok(tasks);
     }
@@ -79,7 +79,7 @@ public class TaskController {
     @GetMapping("/{id}")
     public ResponseEntity<TaskResponseDTO> getTaskById(
             @PathVariable @Parameter(description = "ID de la tarea a obtener") Long id, Authentication authentication) {
-        TaskResponseDTO task = taskService.getTaskById(id, authentication.getName());
+        TaskResponseDTO task = taskService.getTaskById(id, authentication);
         return ResponseEntity.ok(task);
     }
 
@@ -100,7 +100,7 @@ public class TaskController {
             @PathVariable Long id,
             @RequestBody @Valid @Parameter(description = "Detalles de la tarea a actualizar") TaskRequestDTO taskRequestDTO,
             Authentication authentication) {
-        TaskResponseDTO updatedTask = taskService.updateTask(id, taskRequestDTO, authentication.getName());
+        TaskResponseDTO updatedTask = taskService.updateTask(id, taskRequestDTO, authentication);
         return ResponseEntity.ok(updatedTask);
     }
 
@@ -119,7 +119,7 @@ public class TaskController {
     public ResponseEntity<Void> deleteTask(
             @PathVariable @Parameter(description = "ID de la tarea a eliminar") Long id,
             Authentication authentication) {
-        taskService.deleteTask(id, authentication.getName());
+        taskService.deleteTask(id, authentication);
         return ResponseEntity.noContent().build();
     }
 
@@ -139,7 +139,7 @@ public class TaskController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<TaskResponseDTO>> getTasksByUserId(@PathVariable Long userId,
                                                                   Authentication authentication) {
-        List<TaskResponseDTO> tasks = taskService.getTasksByUserId(userId, authentication.getName());
+        List<TaskResponseDTO> tasks = taskService.getTasksByUserId(userId, authentication);
         return ResponseEntity.ok(tasks);
     }
 }

@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,4 +27,8 @@ public class TaskResponseDTO {
 
     @Schema(description = "Nombre del usuario asignado a la tarea", example = "Juan Pérez")
     private String name;
+
+    @Schema(description = "Fecha de creación", example = "2024-12-06T14:30:00")
+    private LocalDateTime createdAt;
+
 }

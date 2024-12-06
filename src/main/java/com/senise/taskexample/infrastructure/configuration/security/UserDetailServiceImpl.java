@@ -25,6 +25,6 @@ public class UserDetailServiceImpl implements UserDetailsService {
     }
 
     private List<SimpleGrantedAuthority> getAuthorities(com.senise.taskexample.domain.entity.User user) {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+        return List.of(new SimpleGrantedAuthority( user.getRole().getName()));
     }
 }

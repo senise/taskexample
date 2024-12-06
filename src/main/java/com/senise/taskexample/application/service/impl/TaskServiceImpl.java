@@ -3,6 +3,7 @@ package com.senise.taskexample.application.service.impl;
 import com.senise.taskexample.application.dto.request.TaskRequestDTO;
 import com.senise.taskexample.application.dto.response.TaskResponseDTO;
 import com.senise.taskexample.application.mapper.TaskMapper;
+import com.senise.taskexample.application.security.SecurityService;
 import com.senise.taskexample.application.service.TaskService;
 import com.senise.taskexample.domain.entity.Task;
 import com.senise.taskexample.domain.entity.User;
@@ -12,6 +13,7 @@ import com.senise.taskexample.domain.exception.UserNotFoundException;
 import com.senise.taskexample.infrastructure.respository.TaskRepository;
 import com.senise.taskexample.infrastructure.respository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -25,31 +27,27 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final TaskMapper taskMapper;
+    private final SecurityService securityService;
 
     /**
      * Crea una nueva tarea.
      */
     public TaskResponseDTO createTask(TaskRequestDTO taskRequestDTO, Authentication authentication) {
-        // Obtener el usuario de la base de datos por su ID
-        User user = userRepository.findById(taskRequestDTO.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+        User user = getUserById(taskRequestDTO.getUserId());
 
-        // Verificar si el usuario logueado es el mismo que el de la tarea o si es un administrador
-        if (user.getEmail().equals(authentication.getName()) || isAdmin(authentication)) {
-            // Crear la tarea si el usuario tiene los permisos adecuados
-            Task task = taskMapper.toEntity(taskRequestDTO, user);
-            taskRepository.save(task);
-            return taskMapper.toResponseDTO(task);
-        } else {
-            // Lanzar la excepción si no tiene los permisos adecuados
-            throw new UserNotAuthorizedException("No tienes permisos para crear una tarea para este usuario.");
-        }
+        // Verificar permisos de acceso
+        verifyAccess(authentication, user.getEmail());
+
+        Task task = taskMapper.toEntity(taskRequestDTO, user);
+        taskRepository.save(task);
+        return taskMapper.toResponseDTO(task);
     }
 
     /**
      * Obtiene la lista de todas las tareas.
      */
-    public List<TaskResponseDTO> getAllTasks(/*String userMail*/) {
+    @PreAuthorize("hasRole('ROLE_ADMIN')")  // Solo para administradores
+    public List<TaskResponseDTO> getAllTasks() {
         List<Task> tasks = taskRepository.findAll();
         return tasks.stream()
                 .map(taskMapper::toResponseDTO)
@@ -59,9 +57,12 @@ public class TaskServiceImpl implements TaskService {
     /**
      * Obtiene el detalle de una tarea por su ID.
      */
-    public TaskResponseDTO getTaskById(Long id, String userMail) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException("Tarea no encontrada"));
+    public TaskResponseDTO getTaskById(Long id, Authentication authentication) {
+        Task task = getTaskById(id);
+        User user = getUserById(task.getUser().getId());
+
+        // Verificar permisos de acceso
+        verifyAccess(authentication, user.getEmail());
 
         return taskMapper.toResponseDTO(task);
     }
@@ -69,14 +70,13 @@ public class TaskServiceImpl implements TaskService {
     /**
      * Actualiza una tarea por su ID.
      */
-    public TaskResponseDTO updateTask(Long id, TaskRequestDTO taskRequestDTO, String userMail) {
-        Task existingTask = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException("Tarea no encontrada"));
+    public TaskResponseDTO updateTask(Long id, TaskRequestDTO taskRequestDTO, Authentication authentication) {
+        Task existingTask = getTaskById(id);
+        User user = getUserById(taskRequestDTO.getUserId());
 
-        User user = userRepository.findById(taskRequestDTO.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+        // Verificar permisos de acceso
+        verifyAccess(authentication, user.getEmail());
 
-        // Actualizar los campos necesarios
         existingTask.setTitle(taskRequestDTO.getTitle());
         existingTask.setDescription(taskRequestDTO.getDescription());
         existingTask.setCompleted(taskRequestDTO.isCompleted());
@@ -90,24 +90,51 @@ public class TaskServiceImpl implements TaskService {
     /**
      * Elimina una tarea por su ID.
      */
-    public void deleteTask(Long id, String userMail) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException("Tarea no encontrada"));
+    public void deleteTask(Long id, Authentication authentication) {
+        Task task = getTaskById(id);
+        User user = task.getUser();
+
+        // Verificar permisos de acceso
+        verifyAccess(authentication, user.getEmail());
 
         taskRepository.delete(task);
     }
 
     @Override
-    public List<TaskResponseDTO> getTasksByUserId(Long userId, String userMail) {
+    public List<TaskResponseDTO> getTasksByUserId(Long userId, Authentication authentication) {
+        User user = getUserById(userId);
+
+        // Verificar permisos de acceso
+        verifyAccess(authentication, user.getEmail());
+
         List<Task> tasks = taskRepository.findByUserId(userId);
         return tasks.stream()
-                .map(taskMapper::toResponseDTO)  // Convertir cada tarea a TaskResponseDTO
+                .map(taskMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    private boolean isAdmin(Authentication authentication) {
-        // Verificamos si el usuario tiene el rol de ADMIN
-        return authentication.getAuthorities().stream()
-                .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
+    /**
+     * Método privado para obtener un usuario por su ID y lanzar excepción si no se encuentra.
+     */
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+    }
+
+    /**
+     * Método privado para obtener una tarea por su ID y lanzar excepción si no se encuentra.
+     */
+    private Task getTaskById(Long taskId) {
+        return taskRepository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException("Tarea no encontrada"));
+    }
+
+    /**
+     * Verifica si el usuario tiene permisos para acceder a un recurso.
+     */
+    private void verifyAccess(Authentication authentication, String userEmail) {
+        if (!securityService.canAccessResource(authentication, userEmail)) {
+            throw new UserNotAuthorizedException("No tienes permisos para acceder a este recurso.");
+        }
     }
 }

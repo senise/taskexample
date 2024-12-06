@@ -11,8 +11,10 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.management.relation.RoleNotFoundException;
 import java.util.List;
 
 @RestController
@@ -36,8 +38,8 @@ public class UserController {
     )
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(
-            @RequestBody @Valid @Parameter(description = "Detalles del usuario que se va a crear") UserRequestDTO userRequestDTO) {
-        UserResponseDTO responseDTO = userService.createUser(userRequestDTO);
+            @RequestBody @Valid @Parameter(description = "Detalles del usuario que se va a crear") UserRequestDTO userRequestDTO, Authentication authentication) {
+        UserResponseDTO responseDTO = userService.createUser(userRequestDTO, authentication);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
@@ -70,8 +72,8 @@ public class UserController {
     )
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(
-            @PathVariable @Parameter(description = "ID del usuario a obtener") Long id) {
-        UserResponseDTO user = userService.getUserById(id);
+            @PathVariable @Parameter(description = "ID del usuario a obtener") Long id, Authentication authentication) {
+        UserResponseDTO user = userService.getUserById(id, authentication);
         return ResponseEntity.ok(user);
     }
 
@@ -90,8 +92,8 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(
             @PathVariable Long id,
-            @RequestBody @Valid @Parameter(description = "Detalles del usuario a actualizar") UserRequestDTO userRequestDTO) {
-        UserResponseDTO updatedUser = userService.updateUser(id, userRequestDTO);
+            @RequestBody @Valid @Parameter(description = "Detalles del usuario a actualizar") UserRequestDTO userRequestDTO, Authentication authentication) throws RoleNotFoundException {
+        UserResponseDTO updatedUser = userService.updateUser(id, userRequestDTO, authentication);
         return ResponseEntity.ok(updatedUser);
     }
 
@@ -108,8 +110,8 @@ public class UserController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(
-            @PathVariable @Parameter(description = "ID del usuario a eliminar") Long id) {
-        userService.deleteUser(id);
+            @PathVariable @Parameter(description = "ID del usuario a eliminar") Long id, Authentication authentication) {
+        userService.deleteUser(id, authentication);
         return ResponseEntity.noContent().build();
     }
 }

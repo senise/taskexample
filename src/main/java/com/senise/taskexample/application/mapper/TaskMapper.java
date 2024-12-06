@@ -23,6 +23,7 @@ public class TaskMapper {
         dto.setName(task.getUser().getName());
         dto.setTitle(task.getTitle());
         dto.setId(task.getId());
+        dto.setCreatedAt(task.getCreatedAt());
         return dto;
         // return modelMapper.map(task, TaskResponseDTO.class);
     }

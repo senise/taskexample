@@ -10,14 +10,14 @@ public interface TaskService {
 
     TaskResponseDTO createTask(TaskRequestDTO taskRequestDTO, Authentication authentication);
 
-    List<TaskResponseDTO> getAllTasks(/*String userMail*/);
+    List<TaskResponseDTO> getAllTasks();
 
-    TaskResponseDTO getTaskById(Long id, String userMail);
+    TaskResponseDTO getTaskById(Long id, Authentication authentication);
 
-    TaskResponseDTO updateTask(Long id, TaskRequestDTO taskRequestDTO, String userMail);
+    TaskResponseDTO updateTask(Long id, TaskRequestDTO taskRequestDTO, Authentication authentication);
 
-    void deleteTask(Long id, String userMail);
+    void deleteTask(Long id, Authentication authentication);
 
-    List<TaskResponseDTO> getTasksByUserId(Long userId, String userMail);
+    List<TaskResponseDTO> getTasksByUserId(Long userId, Authentication authentication);
 }
 

@@ -3,6 +3,8 @@ package com.senise.taskexample.infrastructure.configuration.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -15,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -25,8 +28,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))  // Deshabilitar frameOptions
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/**")
-                        /*.requestMatchers(
+                        .requestMatchers(
                                 "/swagger-ui/**",           // Swagger UI
                                 "/swagger-ui.html",         // Swagger UI HTML
                                 "/v3/api-docs/**",          // Documentación de Swagger
@@ -36,7 +38,7 @@ public class SecurityConfig {
                                 "/api-docs/**",             // API Docs Swagger
                                 "/h2-console/**",           // Acceso H2 console
                                 "/api/v1/auth/**"           // Registro y login usuario
-                        )*/.permitAll()  // Permitir acceso sin autenticación a estos endpoints
+                        ).permitAll()  // Permitir acceso sin autenticación a estos endpoints
                         // Configurar las rutas con permisos para los roles USER y ADMIN
                         //.requestMatchers("/api/v1/tasks/**").hasRole(Role.USER.name()) // Usuarios pueden acceder a sus tareas
                         //.requestMatchers("/api/v1/admin/**").hasRole(Role.ADMIN.name()) // Solo admin puede gestionar usuarios y tareas

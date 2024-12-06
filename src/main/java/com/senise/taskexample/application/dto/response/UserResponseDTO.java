@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,5 +24,8 @@ public class UserResponseDTO {
 
     @Schema(description = "Rol del usuario", example = "ROLE_USER")
     private String role;
+
+    @Schema(description = "Fecha de creación", example = "2024-12-06T14:30:00")
+    private LocalDateTime createdAt;
 }
 
