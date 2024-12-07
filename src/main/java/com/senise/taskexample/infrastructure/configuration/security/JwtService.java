@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 @Service
@@ -70,16 +72,24 @@ public class JwtService {
         return extractClaim(jwtToken, Claims::getExpiration);
     }
 
-    public String generateToken(User u) {
-        return createToken(u.getEmail());
+    public String extractRole(String jwtToken) {
+        Claims claims = extractAllClaims(jwtToken);
+        return claims.get("role", String.class); // Extraer el rol como string
     }
 
-    private String createToken(String email) {
+    public String generateToken(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", user.getRole().getName()); // Agrega el rol como un claim
+        return createToken(claims, user.getEmail());
+    }
+
+    private String createToken(Map<String, Object> claims, String email) {
         return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 horas
-                .signWith(getSigningKey())
-                .compact();
+                .setClaims(claims)                // Agrega los claims personalizados
+                .setSubject(email)                // Establece el subject como el email del usuario
+                .setIssuedAt(new Date())          // Fecha de emisión
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // Expira en 10 horas
+                .signWith(getSigningKey())        // Firma con la clave secreta
+                .compact();                       // Genera el token JWT
     }
 }

@@ -2,7 +2,9 @@ package com.senise.taskexample.application.mapper;
 
 import com.senise.taskexample.application.dto.request.UserRequestDTO;
 import com.senise.taskexample.application.dto.response.UserResponseDTO;
+import com.senise.taskexample.domain.entity.Role;
 import com.senise.taskexample.domain.entity.User;
+import com.senise.taskexample.infrastructure.respository.RoleRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,30 +12,29 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
 
-    // private final ModelMapper modelMapper;
+    private final RoleRepository roleRepository;
 
-    /**
-     * Convierte un DTO de solicitud en una entidad User.
-     */
     public User toEntity(UserRequestDTO userRequestDTO) {
         User user = new User();
         user.setEmail(userRequestDTO.getEmail());
         user.setName(userRequestDTO.getName());
         user.setPassword(userRequestDTO.getPassword());
+
+        // Obtener el rol desde la base de datos y asignarlo al usuario
+       Role role = roleRepository.findByName(userRequestDTO.getRole())
+                .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado: " + userRequestDTO.getRole()));
+
+        user.setRole(role); // Asignar un único rol al usuario
         return user;
-        // return modelMapper.map(userRequestDTO, User.class);
     }
 
-    /**
-     * Convierte una entidad User en un DTO de respuesta.
-     */
     public UserResponseDTO toResponseDTO(User user) {
         UserResponseDTO dto = new UserResponseDTO();
         dto.setEmail(user.getEmail());
         dto.setName(user.getName());
         dto.setId(user.getId());
+        dto.setRole(user.getRole().getName());
+        dto.setCreatedAt(user.getCreatedAt());
         return dto;
-
-        // return modelMapper.map(user, UserResponseDTO.class);
     }
 }

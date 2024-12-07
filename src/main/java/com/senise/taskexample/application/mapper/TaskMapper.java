@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class TaskMapper {
 
-    // private final ModelMapper modelMapper;
 
     /**
      * Convierte una entidad Task en un DTO de respuesta.
@@ -23,8 +22,8 @@ public class TaskMapper {
         dto.setName(task.getUser().getName());
         dto.setTitle(task.getTitle());
         dto.setId(task.getId());
+        dto.setCreatedAt(task.getCreatedAt());
         return dto;
-        // return modelMapper.map(task, TaskResponseDTO.class);
     }
 
     /**
@@ -36,8 +35,7 @@ public class TaskMapper {
         task.setDescription(dto.getDescription());
         task.setTitle(dto.getTitle());
         task.setCompleted(dto.isCompleted());
-        /*Task task = modelMapper.map(dto, Task.class);
-        task.setUser(user); // Asociar el usuario manualmente*/
+        task.setUser(user);
         return task;
     }
 }

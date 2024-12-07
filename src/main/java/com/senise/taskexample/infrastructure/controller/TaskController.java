@@ -3,20 +3,29 @@ package com.senise.taskexample.infrastructure.controller;
 import com.senise.taskexample.application.dto.request.TaskRequestDTO;
 import com.senise.taskexample.application.dto.response.TaskResponseDTO;
 import com.senise.taskexample.application.service.TaskService;
+import com.senise.taskexample.infrastructure.configuration.security.UserDetailServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tasks")
+@RequestMapping("/api/v1/tasks")
 @AllArgsConstructor
 @Tag(name = "Tasks", description = "Operaciones relacionadas con las tareas")
 public class TaskController {
@@ -36,13 +45,14 @@ public class TaskController {
     )
     @PostMapping
     public ResponseEntity<TaskResponseDTO> createTask(
-            @RequestBody @Valid @Parameter(description = "Detalles de la tarea que se va a crear") TaskRequestDTO taskRequestDTO) {
-        TaskResponseDTO responseDTO = taskService.createTask(taskRequestDTO);
+            @RequestBody @Valid @Parameter(description = "Detalles de la tarea que se va a crear") TaskRequestDTO taskRequestDTO,
+            Authentication authentication) {
+        TaskResponseDTO responseDTO = taskService.createTask(taskRequestDTO, authentication);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
     /**
-     * Obtiene la lista de todas las tareas.
+     * Obtiene todas las tareas.
      */
     @Operation(
             summary = "Obtener todas las tareas",
@@ -70,8 +80,9 @@ public class TaskController {
     )
     @GetMapping("/{id}")
     public ResponseEntity<TaskResponseDTO> getTaskById(
-            @PathVariable @Parameter(description = "ID de la tarea a obtener") Long id) {
-        TaskResponseDTO task = taskService.getTaskById(id);
+            @PathVariable @Parameter(description = "ID de la tarea a obtener", example = "1") Long id,
+            Authentication authentication) {
+        TaskResponseDTO task = taskService.getTaskById(id, authentication);
         return ResponseEntity.ok(task);
     }
 
@@ -89,9 +100,10 @@ public class TaskController {
     )
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponseDTO> updateTask(
-            @PathVariable Long id,
-            @RequestBody @Valid @Parameter(description = "Detalles de la tarea a actualizar") TaskRequestDTO taskRequestDTO) {
-        TaskResponseDTO updatedTask = taskService.updateTask(id, taskRequestDTO);
+            @PathVariable @Parameter(description = "ID de tarea que se desea actualizar.", example = "1") Long id,
+            @RequestBody @Valid @Parameter(description = "Detalles de la tarea a actualizar") TaskRequestDTO taskRequestDTO,
+            Authentication authentication) {
+        TaskResponseDTO updatedTask = taskService.updateTask(id, taskRequestDTO, authentication);
         return ResponseEntity.ok(updatedTask);
     }
 
@@ -108,8 +120,9 @@ public class TaskController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(
-            @PathVariable @Parameter(description = "ID de la tarea a eliminar") Long id) {
-        taskService.deleteTask(id);
+            @PathVariable @Parameter(description = "ID de la tarea a eliminar", example = "1") Long id,
+            Authentication authentication) {
+        taskService.deleteTask(id, authentication);
         return ResponseEntity.noContent().build();
     }
 
@@ -122,13 +135,75 @@ public class TaskController {
     @Operation(
             summary = "Obtener todas las tareas de un usuario",
             description = "Este endpoint devuelve todas las tareas asociadas al usuario con el ID especificado.",
-            parameters = {
-                    @Parameter(name = "userId", description = "ID del usuario cuyas tareas se desean obtener", required = true)
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Lista de tareas obtenida con éxito", content = {
+                            @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = TaskResponseDTO.class)))
+                    }),
+                    @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content)
             }
     )
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<TaskResponseDTO>> getTasksByUserId(@PathVariable Long userId) {
-        List<TaskResponseDTO> tasks = taskService.getTasksByUserId(userId);
+    public ResponseEntity<List<TaskResponseDTO>> getTasksByUserId(
+            @PathVariable @Parameter(description = "ID del usuario cuyas tareas se desean obtener", example = "1") Long userId,
+            Authentication authentication) {
+        List<TaskResponseDTO> tasks = taskService.getTasksByUserId(userId, authentication);
+        return ResponseEntity.ok(tasks);
+    }
+
+    /**
+     * Buscar tareas por múltiples criterios.
+     */
+    @Operation(
+            summary = "Buscar tareas por múltiples criterios",
+            description = "Permite buscar tareas filtrando por título, descripción o estado de completado.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Búsqueda realizada con éxito", content = {
+                            @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = TaskResponseDTO.class)))
+                    }),
+                    @ApiResponse(responseCode = "400", description = "Parámetros de búsqueda inválidos", content = @Content),
+                    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+            }
+    )
+    @GetMapping("/search")
+    public ResponseEntity<List<TaskResponseDTO>> searchTasks(
+            @RequestParam(required = false) @Parameter(description = "Título de la tarea", example = "Mi tarea") String title,
+            @RequestParam(required = false) @Parameter(description = "Descripción de la tarea", example = "Esta es una descripción") String description,
+            @RequestParam(required = false) @Parameter(description = "Estado de completado de la tarea (true/false)", example = "true") Boolean completed,
+            Authentication authentication) {
+        List<TaskResponseDTO> tasks = taskService.searchTasks(title, description, completed, authentication);
+
+        if (tasks.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(tasks);
+    }
+
+    /**
+     * Buscar tareas creadas en un periodo de tiempo.
+     */
+    @Operation(
+            summary = "Buscar tareas creadas en un periodo de tiempo",
+            description = "Permite buscar tareas creadas dentro de un rango de fechas.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Búsqueda realizada con éxito", content = {
+                            @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = TaskResponseDTO.class)))
+                    }),
+                    @ApiResponse(responseCode = "400", description = "Parámetros de fecha inválidos", content = @Content),
+                    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+            }
+    )
+    @GetMapping("/created-in-period")
+    public ResponseEntity<List<TaskResponseDTO>> getTasksCreatedInPeriod(
+            @RequestParam @Parameter(description = "Fecha de inicio del periodo", example = "2024-01-01T00:00:00") LocalDateTime startDate,
+            @RequestParam @Parameter(description = "Fecha de fin del periodo", example = "2024-01-31T23:59:59") LocalDateTime endDate,
+            Authentication authentication) {
+        List<TaskResponseDTO> tasks = taskService.getTasksCreatedInPeriod(startDate, endDate, authentication);
+
+        if (tasks.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(tasks);
     }
 }

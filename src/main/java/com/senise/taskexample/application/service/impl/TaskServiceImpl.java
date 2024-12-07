@@ -2,97 +2,88 @@ package com.senise.taskexample.application.service.impl;
 
 import com.senise.taskexample.application.dto.request.TaskRequestDTO;
 import com.senise.taskexample.application.dto.response.TaskResponseDTO;
-import com.senise.taskexample.application.mapper.TaskMapper;
 import com.senise.taskexample.application.service.TaskService;
-import com.senise.taskexample.domain.entity.Task;
-import com.senise.taskexample.domain.entity.User;
-import com.senise.taskexample.domain.exception.TaskNotFoundException;
-import com.senise.taskexample.domain.exception.UserNotFoundException;
-import com.senise.taskexample.infrastructure.respository.TaskRepository;
-import com.senise.taskexample.infrastructure.respository.UserRepository;
+import com.senise.taskexample.domain.usecase.task.*;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class TaskServiceImpl implements TaskService {
 
-    private final TaskRepository taskRepository;
-    private final UserRepository userRepository;
-    private final TaskMapper taskMapper;
+    private final CreateTaskUseCase createTaskUseCase;
+    private final GetAllTasksUseCase getAllTasksUseCase;
+    private final GetTaskByIdUseCase getTaskByIdUseCase;
+    private final UpdateTaskUseCase updateTaskUseCase;
+    private final DeleteTaskUseCase deleteTaskUseCase;
+    private final GetTasksByUserIdUseCase getTasksByUserIdUseCase;
+    private final SearchTasksUseCase searchTasksUseCase;
+    private final GetTasksCreatedInPeriodUseCase getTasksCreatedInPeriodUseCase;
 
     /**
      * Crea una nueva tarea.
      */
-    public TaskResponseDTO createTask(TaskRequestDTO taskRequestDTO) {
-        User user = userRepository.findById(taskRequestDTO.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
-
-        Task task = taskMapper.toEntity(taskRequestDTO, user);
-        taskRepository.save(task);
-
-        return taskMapper.toResponseDTO(task);
+    public TaskResponseDTO createTask(TaskRequestDTO taskRequestDTO, Authentication authentication) {
+        return createTaskUseCase.execute(taskRequestDTO, authentication);
     }
 
     /**
      * Obtiene la lista de todas las tareas.
      */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")  // Solo para administradores
     public List<TaskResponseDTO> getAllTasks() {
-        List<Task> tasks = taskRepository.findAll();
-        return tasks.stream()
-                .map(taskMapper::toResponseDTO)
-                .toList();
+        return getAllTasksUseCase.execute();
     }
 
     /**
      * Obtiene el detalle de una tarea por su ID.
      */
-    public TaskResponseDTO getTaskById(Long id) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException("Tarea no encontrada"));
-
-        return taskMapper.toResponseDTO(task);
+    public TaskResponseDTO getTaskById(Long id, Authentication authentication) {
+        return getTaskByIdUseCase.execute(id, authentication);
     }
 
     /**
      * Actualiza una tarea por su ID.
      */
-    public TaskResponseDTO updateTask(Long id, TaskRequestDTO taskRequestDTO) {
-        Task existingTask = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException("Tarea no encontrada"));
-
-        User user = userRepository.findById(taskRequestDTO.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
-
-        // Actualizar los campos necesarios
-        existingTask.setTitle(taskRequestDTO.getTitle());
-        existingTask.setDescription(taskRequestDTO.getDescription());
-        existingTask.setCompleted(taskRequestDTO.isCompleted());
-        existingTask.setUser(user);
-
-        taskRepository.save(existingTask);
-
-        return taskMapper.toResponseDTO(existingTask);
+    public TaskResponseDTO updateTask(Long id, TaskRequestDTO taskRequestDTO, Authentication authentication) {
+        return updateTaskUseCase.execute(id, taskRequestDTO, authentication);
     }
 
     /**
      * Elimina una tarea por su ID.
      */
-    public void deleteTask(Long id) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException("Tarea no encontrada"));
-
-        taskRepository.delete(task);
+    public void deleteTask(Long id, Authentication authentication) {
+        deleteTaskUseCase.execute(id, authentication);
     }
 
+    /**
+     * Busca tareas pertenecen a un usuario.
+     */
     @Override
-    public List<TaskResponseDTO> getTasksByUserId(Long userId) {
-        List<Task> tasks = taskRepository.findByUserId(userId);
-        return tasks.stream()
-                .map(taskMapper::toResponseDTO)  // Convertir cada tarea a TaskResponseDTO
-                .collect(Collectors.toList());
+    public List<TaskResponseDTO> getTasksByUserId(Long userId, Authentication authentication) {
+        return getTasksByUserIdUseCase.execute(userId, authentication);
     }
+
+    /**
+     * Busca tareas por criterios.
+     */
+    @Override
+    public List<TaskResponseDTO> searchTasks(String title, String description, Boolean completed, Authentication authentication) {
+        return searchTasksUseCase.execute(title, description, completed, authentication);
+
+    }
+
+    /**
+     * Busca tareas creadas dentro de un período de tiempo.
+     */
+    @Override
+    public List<TaskResponseDTO> getTasksCreatedInPeriod(LocalDateTime startDate, LocalDateTime endDate, Authentication authentication) {
+        return getTasksCreatedInPeriodUseCase.execute(startDate, endDate, authentication);
+    }
+
 }

@@ -2,6 +2,7 @@ package com.senise.taskexample.application.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,7 +25,7 @@ public class TaskRequestDTO {
     private boolean completed;
 
     @Schema(description = "ID del usuario asociado a la tarea", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
+    @NotNull
     private Long userId;
 }
 

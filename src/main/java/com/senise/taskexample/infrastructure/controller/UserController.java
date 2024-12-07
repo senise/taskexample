@@ -5,18 +5,25 @@ import com.senise.taskexample.application.dto.response.UserResponseDTO;
 import com.senise.taskexample.application.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.management.relation.RoleNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1/users")
 @AllArgsConstructor
 @Tag(name = "Users", description = "Operaciones relacionadas con los usuarios")
 public class UserController {
@@ -36,8 +43,8 @@ public class UserController {
     )
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(
-            @RequestBody @Valid @Parameter(description = "Detalles del usuario que se va a crear") UserRequestDTO userRequestDTO) {
-        UserResponseDTO responseDTO = userService.createUser(userRequestDTO);
+            @RequestBody @Valid UserRequestDTO userRequestDTO, Authentication authentication) {
+        UserResponseDTO responseDTO = userService.createUser(userRequestDTO, authentication);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
@@ -70,8 +77,8 @@ public class UserController {
     )
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(
-            @PathVariable @Parameter(description = "ID del usuario a obtener") Long id) {
-        UserResponseDTO user = userService.getUserById(id);
+            @PathVariable @Parameter(description = "ID del usuario a obtener", example = "1") Long id, Authentication authentication) {
+        UserResponseDTO user = userService.getUserById(id, authentication);
         return ResponseEntity.ok(user);
     }
 
@@ -89,9 +96,9 @@ public class UserController {
     )
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(
-            @PathVariable Long id,
-            @RequestBody @Valid @Parameter(description = "Detalles del usuario a actualizar") UserRequestDTO userRequestDTO) {
-        UserResponseDTO updatedUser = userService.updateUser(id, userRequestDTO);
+            @PathVariable @Parameter(description = "ID del usuario que se desea actualizar.", example = "1") Long id,
+            @RequestBody @Valid UserRequestDTO userRequestDTO, Authentication authentication) throws RoleNotFoundException {
+        UserResponseDTO updatedUser = userService.updateUser(id, userRequestDTO, authentication);
         return ResponseEntity.ok(updatedUser);
     }
 
@@ -108,10 +115,65 @@ public class UserController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(
-            @PathVariable @Parameter(description = "ID del usuario a eliminar") Long id) {
-        userService.deleteUser(id);
+            @PathVariable @Parameter(description = "ID del usuario a eliminar", example = "1") Long id, Authentication authentication) {
+        userService.deleteUser(id, authentication);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * Buscar usuarios por múltiples criterios.
+     */
+    @Operation(
+            summary = "Buscar usuarios por múltiples criterios",
+            description = "Permite buscar usuarios por nombre, email o rol. Todos los parámetros son opcionales, y se puede combinar cualquiera de ellos."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Búsqueda realizada con éxito", content = {
+                    @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class)))
+            }),
+            @ApiResponse(responseCode = "204", description = "No se encontraron usuarios que coincidan con los criterios de búsqueda", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Parámetros de búsqueda inválidos", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+    })
+    @GetMapping("/search")
+    public ResponseEntity<List<UserResponseDTO>> searchUsers(
+            @RequestParam(required = false) @Parameter(description = "Nombre del usuario", example = "Juan Pérez") String name,
+            @RequestParam(required = false) @Parameter(description = "Email del usuario", example = "juan.perez@example.com") String email,
+            @RequestParam(required = false) @Parameter(description = "Rol del usuario", example = "ADMIN") String role) {
+        List<UserResponseDTO> users = userService.searchUsers(name, email, role);
+
+        if (users.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(users);
+    }
+
+    /**
+     * Buscar usuarios creados en un periodo de tiempo.
+     */
+    @Operation(
+            summary = "Buscar usuarios creados en un periodo de tiempo",
+            description = "Permite buscar usuarios creados dentro de un rango de fechas. Los parámetros de fecha son obligatorios."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Búsqueda realizada con éxito", content = {
+                    @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = UserResponseDTO.class)))
+            }),
+            @ApiResponse(responseCode = "400", description = "Parámetros de fecha inválidos", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+    })
+    @GetMapping("/created-in-period")
+    public ResponseEntity<List<UserResponseDTO>> getUsersCreatedInPeriod(
+            @RequestParam @Parameter(description = "Fecha de inicio del periodo", example = "2024-01-01T00:00:00") LocalDateTime startDate,
+            @RequestParam @Parameter(description = "Fecha de fin del periodo", example = "2024-01-31T23:59:59") LocalDateTime endDate,
+            Authentication authentication) {
+        List<UserResponseDTO> users = userService.getUsersCreatedInPeriod(startDate, endDate, authentication);
+
+        if (users.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(users);
+    }
 }
-
-

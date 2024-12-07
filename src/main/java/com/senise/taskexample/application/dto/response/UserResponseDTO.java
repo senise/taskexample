@@ -5,13 +5,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "DTO que representa al usuario en la respuesta")
+@Schema(description = "DTO para la respuesta de un usuario")
 public class UserResponseDTO {
 
-    @Schema(description = "ID único del usuario", example = "1")
+    @Schema(description = "ID del usuario", example = "1")
     private Long id;
 
     @Schema(description = "Nombre del usuario", example = "Juan Pérez")
@@ -19,4 +21,11 @@ public class UserResponseDTO {
 
     @Schema(description = "Correo electrónico del usuario", example = "juan.perez@example.com")
     private String email;
+
+    @Schema(description = "Rol del usuario", example = "ROLE_USER")
+    private String role;
+
+    @Schema(description = "Fecha de creación", example = "2024-12-06T14:30:00")
+    private LocalDateTime createdAt;
 }
+
