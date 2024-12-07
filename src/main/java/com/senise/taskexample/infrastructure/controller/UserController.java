@@ -77,7 +77,7 @@ public class UserController {
     )
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(
-            @PathVariable @Parameter(description = "ID del usuario a obtener") Long id, Authentication authentication) {
+            @PathVariable @Parameter(description = "ID del usuario a obtener", example = "1") Long id, Authentication authentication) {
         UserResponseDTO user = userService.getUserById(id, authentication);
         return ResponseEntity.ok(user);
     }
@@ -92,15 +92,12 @@ public class UserController {
                     @ApiResponse(responseCode = "200", description = "Usuario actualizado con éxito"),
                     @ApiResponse(responseCode = "400", description = "Datos inválidos proporcionados"),
                     @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
-            },
-            parameters = {
-                    @Parameter(name = "id", description = "ID del usuario que se desea actualizar.", required = true)
             }
     )
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(
-            @PathVariable Long id,
-            @RequestBody @Valid @Parameter(description = "Detalles del usuario a actualizar") UserRequestDTO userRequestDTO, Authentication authentication) throws RoleNotFoundException {
+            @PathVariable @Parameter(description = "ID del usuario que se desea actualizar.", example = "1") Long id,
+            @RequestBody @Valid UserRequestDTO userRequestDTO, Authentication authentication) throws RoleNotFoundException {
         UserResponseDTO updatedUser = userService.updateUser(id, userRequestDTO, authentication);
         return ResponseEntity.ok(updatedUser);
     }
@@ -118,13 +115,13 @@ public class UserController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(
-            @PathVariable @Parameter(description = "ID del usuario a eliminar") Long id, Authentication authentication) {
+            @PathVariable @Parameter(description = "ID del usuario a eliminar", example = "1") Long id, Authentication authentication) {
         userService.deleteUser(id, authentication);
         return ResponseEntity.noContent().build();
     }
 
     /**
-     * Buscar usuarios por múltiples criterios
+     * Buscar usuarios por múltiples criterios.
      */
     @Operation(
             summary = "Buscar usuarios por múltiples criterios",
@@ -140,20 +137,20 @@ public class UserController {
     })
     @GetMapping("/search")
     public ResponseEntity<List<UserResponseDTO>> searchUsers(
-            @RequestParam(required = false) @Parameter(description = "Nombre del usuario") String name,
-            @RequestParam(required = false) @Parameter(description = "Email del usuario") String email,
-            @RequestParam(required = false) @Parameter(description = "Rol del usuario") String role) {
+            @RequestParam(required = false) @Parameter(description = "Nombre del usuario", example = "Juan Pérez") String name,
+            @RequestParam(required = false) @Parameter(description = "Email del usuario", example = "juan.perez@example.com") String email,
+            @RequestParam(required = false) @Parameter(description = "Rol del usuario", example = "ADMIN") String role) {
         List<UserResponseDTO> users = userService.searchUsers(name, email, role);
 
         if (users.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 204 No Content si no hay resultados
+            return ResponseEntity.noContent().build();
         }
 
-        return ResponseEntity.ok(users); // 200 OK con la lista de usuarios
+        return ResponseEntity.ok(users);
     }
 
     /**
-     * Buscar usuarios creados en un periodo de tiempo
+     * Buscar usuarios creados en un periodo de tiempo.
      */
     @Operation(
             summary = "Buscar usuarios creados en un periodo de tiempo",
@@ -168,19 +165,15 @@ public class UserController {
     })
     @GetMapping("/created-in-period")
     public ResponseEntity<List<UserResponseDTO>> getUsersCreatedInPeriod(
-            @RequestParam @Parameter(description = "Fecha de inicio del periodo") LocalDateTime startDate,
-            @RequestParam @Parameter(description = "Fecha de fin del periodo") LocalDateTime endDate,
+            @RequestParam @Parameter(description = "Fecha de inicio del periodo", example = "2024-01-01T00:00:00") LocalDateTime startDate,
+            @RequestParam @Parameter(description = "Fecha de fin del periodo", example = "2024-01-31T23:59:59") LocalDateTime endDate,
             Authentication authentication) {
-        List<UserResponseDTO> users = userService.getUsersCreatedInPeriod(startDate, endDate, authentication );
+        List<UserResponseDTO> users = userService.getUsersCreatedInPeriod(startDate, endDate, authentication);
 
         if (users.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 204 No Content si no hay resultados
+            return ResponseEntity.noContent().build();
         }
 
-        return ResponseEntity.ok(users); // 200 OK con la lista de usuarios
+        return ResponseEntity.ok(users);
     }
-
-
 }
-
-
