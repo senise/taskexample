@@ -11,13 +11,17 @@ import com.senise.taskexample.domain.exception.UserNotAuthorizedException;
 import com.senise.taskexample.domain.exception.UserNotFoundException;
 import com.senise.taskexample.infrastructure.respository.RoleRepository;
 import com.senise.taskexample.infrastructure.respository.UserRepository;
+import com.senise.taskexample.infrastructure.respository.specifications.SpecificationBuilder;
 import lombok.AllArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.management.relation.RoleNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -33,7 +37,7 @@ public class UserServiceImpl implements UserService {
      */
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO, Authentication authentication) {
         // Verificar si el usuario logueado es el mismo o es admin
-        if (!securityService.canAccessResource(authentication, userRequestDTO.getEmail()) && !securityService.isAdmin(authentication)) {
+        if (securityService.canAccessResource(authentication, userRequestDTO.getEmail()) && !securityService.isAdmin(authentication)) {
             throw new UserNotAuthorizedException("No tienes permisos para crear un usuario para este correo.");
         }
 
@@ -61,7 +65,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
         // Verificar que el usuario logueado sea el mismo o un administrador
-        if (!securityService.canAccessResource(authentication, user.getEmail())) {
+        if (securityService.canAccessResource(authentication, user.getEmail())) {
             throw new UserNotAuthorizedException("No tienes permisos para ver este usuario.");
         }
 
@@ -77,7 +81,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
         // Verificar si el usuario logueado puede actualizar este perfil o si es admin
-        if (!securityService.canAccessResource(authentication, existingUser.getEmail()) && !securityService.isAdmin(authentication)) {
+        if (securityService.canAccessResource(authentication, existingUser.getEmail()) && !securityService.isAdmin(authentication)) {
             throw new UserNotAuthorizedException("No tienes permisos para actualizar este usuario.");
         }
 
@@ -108,10 +112,56 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
         // Verificar si el usuario logueado puede eliminar este perfil o si es admin
-        if (!securityService.canAccessResource(authentication, user.getEmail()) && !securityService.isAdmin(authentication)) {
+        if (securityService.canAccessResource(authentication, user.getEmail()) && !securityService.isAdmin(authentication)) {
             throw new UserNotAuthorizedException("No tienes permisos para eliminar este usuario.");
         }
 
         userRepository.delete(user);
+    }
+
+    /**
+     * Busca usuarios por criterios.
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")  // Solo para administradores
+    @Override
+    public List<UserResponseDTO> searchUsers(String name, String email, String role) {
+        Specification<User> spec = Specification.where(null);
+
+        if (name != null && !name.isEmpty()) {
+            spec = spec.and(SpecificationBuilder.containsIgnoreCase("name", name));
+        }
+
+        if (email != null && !email.isEmpty()) {
+            spec = spec.and(SpecificationBuilder.containsIgnoreCase("email", email));
+        }
+
+        if (role != null && !role.isEmpty()) {
+            spec = spec.and(SpecificationBuilder.containsIgnoreCase("role.name", role)); // Acceso a relaciones
+        }
+
+        List<User> users = userRepository.findAll(spec);
+        return users.stream()
+                .map(userMapper::toResponseDTO)
+                .toList();
+    }
+
+    /**
+     * Busca usuarios creados dentro de un período de tiempo.
+     */
+    @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN')")  // Solo para administradores
+    public List<UserResponseDTO> getUsersCreatedInPeriod(LocalDateTime startDate, LocalDateTime endDate, Authentication authentication) {
+        // Verificamos que el usuario autenticado tenga el rol de administrador
+        if (!securityService.isAdmin(authentication)) {
+            throw new UserNotAuthorizedException("Acceso denegado. Solo administradores pueden realizar esta operación.");
+        }
+
+        // Obtenemos todos los usuarios creados en el rango de fechas especificado
+        List<User> users = userRepository.findByCreatedAtBetween(startDate, endDate);
+
+        // Convertimos los usuarios a DTOs y los devolvemos
+        return users.stream()
+                .map(userMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 }

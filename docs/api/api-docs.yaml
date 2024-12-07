@@ -1,0 +1,646 @@
+openapi: 3.0.1
+info:
+  title: TASK EXAMPLE API REST
+  description: 'EJEMPLO DE API REST CON SPRINGBOOT '
+  contact:
+    name: SENISE
+  license:
+    name: SIN LICENCIA 😂
+  version: "1.0"
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+security:
+- Bearer_Authentication: []
+tags:
+- name: Users
+  description: Operaciones relacionadas con los usuarios
+- name: Auth
+  description: Operaciones relacionadas con el login de usuario
+- name: Tasks
+  description: Operaciones relacionadas con las tareas
+paths:
+  /api/v1/users/{id}:
+    get:
+      tags:
+      - Users
+      summary: Obtener detalles de un usuario
+      description: Este endpoint devuelve los detalles de un usuario específico por
+        su ID.
+      operationId: getUserById
+      parameters:
+      - name: id
+        in: path
+        description: ID del usuario a obtener
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Usuario encontrado
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponseDTO"
+        "404":
+          description: Usuario no encontrado
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponseDTO"
+    put:
+      tags:
+      - Users
+      summary: Actualizar usuario existente
+      description: Este endpoint permite actualizar un usuario existente por su ID.
+      operationId: updateUser
+      parameters:
+      - name: id
+        in: path
+        description: ID del usuario que se desea actualizar.
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: Usuario actualizado con éxito
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponseDTO"
+        "400":
+          description: Datos inválidos proporcionados
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponseDTO"
+        "404":
+          description: Usuario no encontrado
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponseDTO"
+    delete:
+      tags:
+      - Users
+      summary: Eliminar un usuario
+      description: Este endpoint permite eliminar un usuario por su ID.
+      operationId: deleteUser
+      parameters:
+      - name: id
+        in: path
+        description: ID del usuario a eliminar
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Usuario eliminado con éxito
+        "404":
+          description: Usuario no encontrado
+  /api/v1/tasks/{id}:
+    get:
+      tags:
+      - Tasks
+      summary: Obtener detalles de una tarea
+      description: Este endpoint devuelve los detalles de una tarea específica por
+        su ID.
+      operationId: getTaskById
+      parameters:
+      - name: id
+        in: path
+        description: ID de la tarea a obtener
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Tarea encontrada
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TaskResponseDTO"
+        "404":
+          description: Tarea no encontrada
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TaskResponseDTO"
+    put:
+      tags:
+      - Tasks
+      summary: Actualizar tarea existente
+      description: Este endpoint permite actualizar una tarea existente por su ID.
+      operationId: updateTask
+      parameters:
+      - name: id
+        in: path
+        description: ID de tarea que se desea actualizar.
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: Tarea actualizada con éxito
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TaskResponseDTO"
+        "400":
+          description: Datos inválidos proporcionados
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TaskResponseDTO"
+        "404":
+          description: Tarea no encontrada
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TaskResponseDTO"
+    delete:
+      tags:
+      - Tasks
+      summary: Eliminar una tarea
+      description: Este endpoint permite eliminar una tarea por su ID.
+      operationId: deleteTask
+      parameters:
+      - name: id
+        in: path
+        description: ID de la tarea a eliminar
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Tarea eliminada con éxito
+        "404":
+          description: Tarea no encontrada
+  /api/v1/users:
+    get:
+      tags:
+      - Users
+      summary: Obtener todos los usuarios
+      description: Este endpoint devuelve una lista con todos los usuarios almacenados
+        en el sistema.
+      operationId: getAllUsers
+      responses:
+        "200":
+          description: Lista de usuarios obtenida con éxito
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponseDTO"
+    post:
+      tags:
+      - Users
+      summary: Crear un nuevo usuario
+      description: Este endpoint permite crear un nuevo usuario en el sistema.
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRequestDTO"
+        required: true
+      responses:
+        "201":
+          description: Usuario creado con éxito
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponseDTO"
+        "400":
+          description: Datos inválidos proporcionados
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponseDTO"
+  /api/v1/tasks:
+    get:
+      tags:
+      - Tasks
+      summary: Obtener todas las tareas
+      description: Este endpoint devuelve una lista con todas las tareas almacenadas
+        en el sistema.
+      operationId: getAllTasks
+      responses:
+        "200":
+          description: Lista de tareas obtenida con éxito
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TaskResponseDTO"
+    post:
+      tags:
+      - Tasks
+      summary: Crear una nueva tarea
+      description: Este endpoint permite crear una nueva tarea en el sistema.
+      operationId: createTask
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskRequestDTO"
+        required: true
+      responses:
+        "201":
+          description: Tarea creada con éxito
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TaskResponseDTO"
+        "400":
+          description: Datos inválidos proporcionados
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TaskResponseDTO"
+  /api/v1/auth/register:
+    post:
+      tags:
+      - Auth
+      summary: Registrar un nuevo usuario
+      description: Este endpoint permite a un usuario registrarse proporcionando sus
+        datos.
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRequestDTO"
+        required: true
+      responses:
+        "204":
+          description: Registro exitoso
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponseDTO"
+        "400":
+          description: Solicitud incorrecta - Detalles del usuario inválidos
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponseDTO"
+  /api/v1/auth/login:
+    post:
+      tags:
+      - Auth
+      summary: Iniciar sesión de un usuario
+      description: Este endpoint permite a un usuario iniciar sesión y obtener un
+        token JWT para acceder a recursos protegidos.
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "401":
+          description: No autorizado - Credenciales inválidas
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "200":
+          description: Inicio de sesión exitoso
+          content:
+            application/json: {}
+  /api/v1/users/search:
+    get:
+      tags:
+      - Users
+      summary: Buscar usuarios por múltiples criterios
+      description: "Permite buscar usuarios por nombre, email o rol. Todos los pará\
+        metros son opcionales, y se puede combinar cualquiera de ellos."
+      operationId: searchUsers
+      parameters:
+      - name: name
+        in: query
+        description: Nombre del usuario
+        required: false
+        schema:
+          type: string
+      - name: email
+        in: query
+        description: Email del usuario
+        required: false
+        schema:
+          type: string
+      - name: role
+        in: query
+        description: Rol del usuario
+        required: false
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Parámetros de búsqueda inválidos
+        "200":
+          description: Búsqueda realizada con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponseDTO"
+        "500":
+          description: Error interno del servidor
+        "204":
+          description: No se encontraron usuarios que coincidan con los criterios
+            de búsqueda
+  /api/v1/users/created-in-period:
+    get:
+      tags:
+      - Users
+      summary: Buscar usuarios creados en un periodo de tiempo
+      description: Permite buscar usuarios creados dentro de un rango de fechas. Los
+        parámetros de fecha son obligatorios.
+      operationId: getUsersCreatedInPeriod
+      parameters:
+      - name: startDate
+        in: query
+        description: Fecha de inicio del periodo
+        required: true
+        schema:
+          type: string
+          format: date-time
+      - name: endDate
+        in: query
+        description: Fecha de fin del periodo
+        required: true
+        schema:
+          type: string
+          format: date-time
+      responses:
+        "200":
+          description: Búsqueda realizada con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponseDTO"
+        "500":
+          description: Error interno del servidor
+        "400":
+          description: Parámetros de fecha inválidos
+  /api/v1/tasks/user/{userId}:
+    get:
+      tags:
+      - Tasks
+      summary: Obtener todas las tareas de un usuario
+      description: Este endpoint devuelve todas las tareas asociadas al usuario con
+        el ID especificado.
+      operationId: getTasksByUserId
+      parameters:
+      - name: userId
+        in: path
+        description: ID del usuario cuyas tareas se desean obtener
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TaskResponseDTO"
+  /api/v1/tasks/search:
+    get:
+      tags:
+      - Tasks
+      summary: Buscar tareas por múltiples criterios
+      description: "Permite buscar tareas filtrando por título, descripción o estado\
+        \ de completado. Todos los parámetros son opcionales y se pueden combinar."
+      operationId: searchTasks
+      parameters:
+      - name: title
+        in: query
+        description: Título de la tarea
+        required: false
+        schema:
+          type: string
+      - name: description
+        in: query
+        description: Descripción de la tarea
+        required: false
+        schema:
+          type: string
+      - name: completed
+        in: query
+        description: Estado de completado de la tarea (true/false)
+        required: false
+        schema:
+          type: boolean
+      responses:
+        "400":
+          description: Parámetros de búsqueda inválidos
+        "200":
+          description: Búsqueda realizada con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TaskResponseDTO"
+        "500":
+          description: Error interno del servidor
+  /api/v1/tasks/created-in-period:
+    get:
+      tags:
+      - Tasks
+      summary: Buscar tareas creadas en un periodo de tiempo
+      description: Permite buscar tareas creadas dentro de un rango de fechas. Los
+        parámetros de fecha son obligatorios.
+      operationId: getTasksCreatedInPeriod
+      parameters:
+      - name: startDate
+        in: query
+        description: Fecha de inicio del periodo
+        required: true
+        schema:
+          type: string
+          format: date-time
+      - name: endDate
+        in: query
+        description: Fecha de fin del periodo
+        required: true
+        schema:
+          type: string
+          format: date-time
+      responses:
+        "200":
+          description: Búsqueda realizada con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TaskResponseDTO"
+        "500":
+          description: Error interno del servidor
+        "400":
+          description: Parámetros de fecha inválidos
+components:
+  schemas:
+    UserRequestDTO:
+      required:
+      - email
+      - name
+      - password
+      - role
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre del usuario
+          example: Juan Pérez
+        email:
+          type: string
+          description: Correo electrónico del usuario
+          example: juan.perez@example.com
+        password:
+          type: string
+          description: Contraseña del usuario
+          example: Abc1234.
+        role:
+          type: string
+          description: Rol del usuario
+          example: ROLE_USER
+      description: Detalles del usuario a actualizar
+    UserResponseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID del usuario
+          format: int64
+          example: 1
+        name:
+          type: string
+          description: Nombre del usuario
+          example: Juan Pérez
+        email:
+          type: string
+          description: Correo electrónico del usuario
+          example: juan.perez@example.com
+        role:
+          type: string
+          description: Rol del usuario
+          example: ROLE_USER
+        createdAt:
+          type: string
+          description: Fecha de creación
+          format: date-time
+      description: DTO para la respuesta de un usuario
+    TaskRequestDTO:
+      required:
+      - description
+      - title
+      - userId
+      type: object
+      properties:
+        title:
+          type: string
+          description: Título de la tarea
+          example: Comprar leche
+        description:
+          type: string
+          description: Descripción detallada de la tarea
+          example: Ir al supermercado a comprar leche
+        completed:
+          type: boolean
+          description: Indica si la tarea está completada
+          example: false
+        userId:
+          type: integer
+          description: ID del usuario asociado a la tarea
+          format: int64
+          example: 1
+      description: Detalles de la tarea que se va a crear
+    TaskResponseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID único de la tarea
+          format: int64
+          example: 1
+        title:
+          type: string
+          description: Título de la tarea
+          example: Comprar leche
+        description:
+          type: string
+          description: Descripción detallada de la tarea
+          example: Ir al supermercado a comprar leche
+        completed:
+          type: boolean
+          description: Indica si la tarea está completada
+          example: false
+        name:
+          type: string
+          description: Nombre del usuario asignado a la tarea
+          example: Juan Pérez
+        createdAt:
+          type: string
+          description: Fecha de creación
+          format: date-time
+      description: DTO que representa la tarea en la respuesta
+    LoginRequest:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+          description: Correo electrónico del usuario
+          example: juan.perez@example.com
+        password:
+          type: string
+          description: Contraseña del usuario
+          example: Abc1234.
+      description: Detalles del usuario que se va a logear
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token de usuario
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.dyt0CoTl4WoVjAHI9Q_CwSKhl6d_9rhM3NrXuJttkao
+      description: DTO para la respuesta de Token para usuario
+  securitySchemes:
+    Bearer_Authentication:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

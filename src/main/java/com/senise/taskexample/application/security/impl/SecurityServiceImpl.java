@@ -1,6 +1,7 @@
 package com.senise.taskexample.application.security.impl;
 
 import com.senise.taskexample.application.security.SecurityService;
+import com.senise.taskexample.domain.exception.UserNotAuthorizedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,7 @@ public class SecurityServiceImpl implements SecurityService {
      * @return true si el usuario tiene permisos para realizar la acción.
      */
     public boolean canAccessResource(Authentication authentication, String targetEmail) {
-        return authentication.getName().equals(targetEmail) || isAdmin(authentication);
+        return !authentication.getName().equals(targetEmail) && !isAdmin(authentication);
     }
 
     /**
@@ -27,5 +28,11 @@ public class SecurityServiceImpl implements SecurityService {
     public boolean isAdmin(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    public void verifyAccess(Authentication authentication, String userEmail) {
+        if (this.canAccessResource(authentication, userEmail)) {
+            throw new UserNotAuthorizedException("No tienes permisos para acceder a este recurso.");
+        }
     }
 }

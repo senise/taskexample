@@ -34,6 +34,7 @@ public class UserMapper {
         dto.setName(user.getName());
         dto.setId(user.getId());
         dto.setRole(user.getRole().getName());
+        dto.setCreatedAt(user.getCreatedAt());
         return dto;
     }
 }

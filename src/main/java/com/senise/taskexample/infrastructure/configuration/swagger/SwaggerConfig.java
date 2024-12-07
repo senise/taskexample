@@ -1,5 +1,6 @@
 package com.senise.taskexample.infrastructure.configuration.swagger;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -17,23 +18,23 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
 
     private SecurityScheme createAPIKeyScheme() {
-        return new SecurityScheme().type(SecurityScheme.Type.HTTP)
+        return new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
                 .bearerFormat("JWT")
                 .scheme("bearer");
     }
 
     @Bean
     public OpenAPI openAPI() {
-        return new OpenAPI().addSecurityItem(new SecurityRequirement()
-                        .addList("Bearer Authentication"))
+        return new OpenAPI()
+                .addSecurityItem(new SecurityRequirement().addList("Bearer_Authentication"))  // Aplica el requisito de Bearer Authentication
                 .components(new Components().addSecuritySchemes(
-                        "Bearer Authentication", createAPIKeyScheme()))
-                .info(new Info().title("TASK EXAMPLE API REST")
-                        .description("EJEMPLO DE API REST CON SPRINBOOT ")
+                        "Bearer_Authentication", createAPIKeyScheme()))  // Define el esquema de Bearer
+                .info(new Info()
+                        .title("TASK EXAMPLE API REST")
+                        .description("EJEMPLO DE API REST CON SPRINGBOOT ")
                         .version("1.0")
                         .contact(new Contact().name("SENISE"))
                         .license(new License().name("SIN LICENCIA 😂")));
     }
 }
-
-

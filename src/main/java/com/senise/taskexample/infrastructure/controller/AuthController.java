@@ -4,7 +4,8 @@ import com.senise.taskexample.application.dto.request.LoginRequest;
 import com.senise.taskexample.application.dto.request.UserRequestDTO;
 import com.senise.taskexample.application.dto.response.TokenResponse;
 import com.senise.taskexample.application.dto.response.UserResponseDTO;
-import com.senise.taskexample.application.service.AuthService;
+import com.senise.taskexample.domain.usecase.auth.LoginUserUseCase;
+import com.senise.taskexample.domain.usecase.auth.RegisterUserUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -21,7 +22,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+    private final RegisterUserUseCase registerUserUseCase;
+    private final LoginUserUseCase loginUserUseCase;
 
     /**
      * Endpoint para registrar un nuevo usuario.
@@ -38,7 +40,7 @@ public class AuthController {
     @PostMapping(path = "/register")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRequestDTO userRequestDTO) {
-        return ResponseEntity.ok(authService.register(userRequestDTO));
+        return ResponseEntity.ok(registerUserUseCase.execute(userRequestDTO));
     }
 
     /**
@@ -55,6 +57,6 @@ public class AuthController {
     })
     @PostMapping(path = "/login")
     public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.ok(authService.login(loginRequest));
+        return ResponseEntity.ok(loginUserUseCase.execute(loginRequest));
     }
 }

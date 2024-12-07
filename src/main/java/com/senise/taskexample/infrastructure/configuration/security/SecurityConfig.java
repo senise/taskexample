@@ -32,6 +32,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",           // Swagger UI
                                 "/swagger-ui.html",         // Swagger UI HTML
                                 "/v3/api-docs/**",          // Documentación de Swagger
+                                "/v3/api-docs.yaml",        // Para el yaml
                                 "/swagger-resources/**",    // Recursos de Swagger
                                 "/webjars/**",              // Swagger webjars (js, css)
                                 "/api-docs/swagger-config", // Configuración de Swagger

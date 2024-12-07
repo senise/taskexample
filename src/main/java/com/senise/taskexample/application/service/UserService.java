@@ -5,6 +5,7 @@ import com.senise.taskexample.application.dto.response.UserResponseDTO;
 import org.springframework.security.core.Authentication;
 
 import javax.management.relation.RoleNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -19,6 +20,10 @@ public interface UserService {
     UserResponseDTO updateUser(Long id, UserRequestDTO userRequestDTO, Authentication authentication) throws RoleNotFoundException;
 
     void deleteUser(Long id, Authentication authentication);
+
+    List<UserResponseDTO> searchUsers(String name, String email, String role);
+
+    List<UserResponseDTO> getUsersCreatedInPeriod(LocalDateTime startDate, LocalDateTime endDate, Authentication authentication);
 }
 
 
