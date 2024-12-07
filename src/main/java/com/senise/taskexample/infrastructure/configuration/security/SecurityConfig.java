@@ -36,7 +36,6 @@ public class SecurityConfig {
                                 "/swagger-resources/**",    // Recursos de Swagger
                                 "/webjars/**",              // Swagger webjars (js, css)
                                 "/api-docs/swagger-config", // Configuración de Swagger
-                                "/api-docs/**",             // API Docs Swagger
                                 "/h2-console/**",           // Acceso H2 console
                                 "/api/v1/auth/**"           // Registro y login usuario
                         ).permitAll()  // Permitir acceso sin autenticación a estos endpoints
