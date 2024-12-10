@@ -34,7 +34,6 @@ public class SwaggerConfig {
                         .title("TASK EXAMPLE API REST")
                         .description("EJEMPLO DE API REST CON SPRINGBOOT ")
                         .version("1.0")
-                        .contact(new Contact().name("SENISE"))
-                        .license(new License().name("SIN LICENCIA 😂")));
+                        .contact(new Contact().name("SENISE")));
     }
 }

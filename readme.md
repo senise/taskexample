@@ -26,6 +26,12 @@ Este proyecto proporciona una API para gestionar tareas, con funcionalidades de 
 
 A continuación se muestra una lista de los principales endpoints disponibles:
 
+### Autorización
+
+- `POST /api/v1/auth/register` - **Registrar un nuevo usuario**
+- `POST /api/v1/auth/login` -**Iniciar sesión de un usuario**
+  ![Texto alternativo](src/main/resources/img/auth.png)
+
 ### Usuarios
 
 - `POST /api/v1/users` - **Crear un usuario**
@@ -35,6 +41,7 @@ A continuación se muestra una lista de los principales endpoints disponibles:
 - `DELETE /api/v1/users/{id}` - **Eliminar un usuario por ID**
 - `GET /api/v1/users/search` - **Buscar usuarios** (Por nombre, email, rol) (Solo Admin)
 - `GET /api/v1/users/created-in-period` - **Buscar usuarios creados en un periodo de tiempo** (Solo Admin)
+  ![Texto alternativo](src/main/resources/img/users.png)
 
 ### Tareas
 
@@ -46,6 +53,7 @@ A continuación se muestra una lista de los principales endpoints disponibles:
 - `GET /api/v1/tasks/user/{userId}` - **Obtener tareas por usuario**
 - `GET /api/v1/tasks/search` - **Buscar tareas** (Por título, descripción, completada)
 - `GET /api/v1/tasks/created-in-period` - **Buscar tareas creadas en un periodo de tiempo**
+  ![Texto alternativo](src/main/resources/img/task.png)
 
 ---
 
