@@ -13,4 +13,7 @@ public class TokenResponse {
 
     @Schema(description = "Token de usuario", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.dyt0CoTl4WoVjAHI9Q_CwSKhl6d_9rhM3NrXuJttkao")
     private String token;
+
+    @Schema(description = "ID del usuario", example = "1")
+    private Long id;
 }

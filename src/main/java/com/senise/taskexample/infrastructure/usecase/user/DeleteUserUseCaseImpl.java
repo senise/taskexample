@@ -1,6 +1,5 @@
 package com.senise.taskexample.infrastructure.usecase.user;
 
-import com.senise.taskexample.application.mapper.UserMapper;
 import com.senise.taskexample.application.security.SecurityService;
 import com.senise.taskexample.domain.entity.User;
 import com.senise.taskexample.domain.usecase.user.DeleteUserUseCase;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class DeleteUserUseCaseImpl implements DeleteUserUseCase {
     private final SecurityService securityService;
-    private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final GetUserByIdCheckUseCase getUserByIdCheckUseCase;
 

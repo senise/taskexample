@@ -29,6 +29,6 @@ public class LoginUserUseCaseImpl implements LoginUserUseCase {
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        return new TokenResponse(jwtService.generateToken(user));
+        return new TokenResponse(jwtService.generateToken(user), user.getId());
     }
 }

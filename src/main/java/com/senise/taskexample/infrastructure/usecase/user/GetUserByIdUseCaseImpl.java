@@ -7,7 +7,6 @@ import com.senise.taskexample.domain.entity.User;
 import com.senise.taskexample.domain.exception.UserNotAuthorizedException;
 import com.senise.taskexample.domain.usecase.user.GetUserByIdCheckUseCase;
 import com.senise.taskexample.domain.usecase.user.GetUserByIdUseCase;
-import com.senise.taskexample.infrastructure.respository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 public class GetUserByIdUseCaseImpl implements GetUserByIdUseCase {
     private final SecurityService securityService;
     private final UserMapper userMapper;
-    private final UserRepository userRepository;
     private final GetUserByIdCheckUseCase getUserByIdCheckUseCase;
 
     @Override
