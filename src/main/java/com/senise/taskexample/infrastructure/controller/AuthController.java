@@ -13,7 +13,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Auth", description = "Operaciones relacionadas con el login de usuario")
 @RestController
@@ -32,13 +35,12 @@ public class AuthController {
             description = "Este endpoint permite a un usuario registrarse proporcionando sus datos."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Registro exitoso"),
+            @ApiResponse(responseCode = "201", description = "Registro exitoso"),
             @ApiResponse(responseCode = "400", description = "Solicitud incorrecta - Detalles del usuario inválidos")
     })
     @PostMapping(path = "/register")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRequestDTO userRequestDTO) {
-        return ResponseEntity.ok(authService.register(userRequestDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(userRequestDTO));
     }
 
     /**

@@ -1,62 +1,58 @@
 package com.senise.taskexample.infrastructure.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-
 import com.senise.taskexample.application.dto.request.LoginRequestDTO;
 import com.senise.taskexample.application.dto.request.UserRequestDTO;
 import com.senise.taskexample.application.dto.response.TokenResponseDTO;
 import com.senise.taskexample.application.dto.response.UserResponseDTO;
-import com.senise.taskexample.domain.usecase.auth.LoginUserUseCase;
-import com.senise.taskexample.domain.usecase.auth.RegisterUserUseCase;
+import com.senise.taskexample.application.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AuthController.class)
+
+@SpringBootTest
+@AutoConfigureMockMvc
 public class AuthControllerTest {
+
+    @MockBean
+    private AuthService authService;
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private RegisterUserUseCase registerUserUseCase;
-
-    @MockBean
-    private LoginUserUseCase loginUserUseCase;
 
     @Test
     void register() throws Exception {
         // Crear un DTO de respuesta de usuario simulado
         UserResponseDTO userResponseDTO = new UserResponseDTO(
-                1L, 
-                "Alice", 
-                "alice@example.com", 
-                "ROLE_USER", 
-                null // No es necesario incluir la fecha en este test
+                1L,
+                "Alice",
+                "alice@example.com",
+                "ROLE_USER",
+                null
         );
 
-        // Simular el comportamiento de RegisterUserUseCase
-        given(registerUserUseCase.execute(any(UserRequestDTO.class))).willReturn(userResponseDTO);
+        // Simular el comportamiento del AuthService
+        given(authService.register(any(UserRequestDTO.class))).willReturn(userResponseDTO);
 
-        // Realizar el test del endpoint de registro
+        // Realizar el test
         mockMvc.perform(post("/api/v1/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\":\"Alice\",\"email\":\"alice@example.com\",\"password\":\"password\"}"))
-                .andExpect(status().isNoContent()) // Se espera el código de estado 204
-                .andExpect(content().string(""))  // No hay contenido en la respuesta
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Alice"))
-                .andExpect(jsonPath("$.email").value("alice@example.com"))
-                .andExpect(jsonPath("$.role").value("ROLE_USER"));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Alice\",\"email\":\"alice@example.com\",\"password\":\"password\",\"role\":\"ROLE_USER\"}"))
+                .andExpect(status().isCreated()) // Verifica el código 201
+                .andExpect(jsonPath("$.id").value(1)) // Verifica el campo "id" en la respuesta
+                .andExpect(jsonPath("$.name").value("Alice")) // Verifica el campo "name" en la respuesta
+                .andExpect(jsonPath("$.email").value("alice@example.com")) // Verifica el campo "email" en la respuesta
+                .andExpect(jsonPath("$.role").value("ROLE_USER")); // Verifica que el campo "role" es "ROLE_USER"
     }
 
     @Test
@@ -67,14 +63,14 @@ public class AuthControllerTest {
                 1L
         );
 
-        // Simular el comportamiento de LoginUserUseCase
-        given(loginUserUseCase.execute(any(LoginRequestDTO.class))).willReturn(tokenResponse);
+        // Simular el comportamiento del AuthService
+        given(authService.login(any(LoginRequestDTO.class))).willReturn(tokenResponse);
 
-        // Realizar el test del endpoint de login
+        // Realizar el test
         mockMvc.perform(post("/api/v1/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"alice@example.com\",\"password\":\"password\"}"))
-                .andExpect(status().isOk()) // Se espera el código de estado 200
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"alice@example.com\",\"password\":\"password\"}"))
+                .andExpect(status().isOk()) // Verifica el código 200
                 .andExpect(jsonPath("$.token").value(tokenResponse.getToken()))
                 .andExpect(jsonPath("$.id").value(1));
     }

@@ -65,7 +65,7 @@ public class AuthServiceImplTest {
                 .andExpect(jsonPath("$.role").value("ROLE_USER"))
                 // Verificar que el createdAt esté cerca de la hora actual
                 .andExpect(jsonPath("$.createdAt").exists())
-                .andExpect(jsonPath("$.createdAt").value(matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}")));
+                .andExpect(jsonPath("$.createdAt").value(matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+")));
     }
 
 
