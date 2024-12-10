@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @Schema(description = "Detalles del usuario que se va a logear")
-public class LoginRequest {
+public class LoginRequestDTO {
 
     @Schema(description = "Correo electrónico del usuario", example = "juan.perez@example.com", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank

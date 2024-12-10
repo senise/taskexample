@@ -1,8 +1,8 @@
 package com.senise.taskexample.application.service.impl;
 
-import com.senise.taskexample.application.dto.request.LoginRequest;
+import com.senise.taskexample.application.dto.request.LoginRequestDTO;
 import com.senise.taskexample.application.dto.request.UserRequestDTO;
-import com.senise.taskexample.application.dto.response.TokenResponse;
+import com.senise.taskexample.application.dto.response.TokenResponseDTO;
 import com.senise.taskexample.application.dto.response.UserResponseDTO;
 import com.senise.taskexample.application.service.AuthService;
 import com.senise.taskexample.domain.usecase.auth.LoginUserUseCase;
@@ -28,7 +28,7 @@ public class AuthServiceImpl implements AuthService {
      * Login de usuario
      */
     @Override
-    public TokenResponse login(LoginRequest loginRequest) {
+    public TokenResponseDTO login(LoginRequestDTO loginRequest) {
         return loginUserUseCase.execute(loginRequest);
     }
 }

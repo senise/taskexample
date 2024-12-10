@@ -1,8 +1,8 @@
 package com.senise.taskexample.infrastructure.controller;
 
-import com.senise.taskexample.application.dto.request.LoginRequest;
+import com.senise.taskexample.application.dto.request.LoginRequestDTO;
 import com.senise.taskexample.application.dto.request.UserRequestDTO;
-import com.senise.taskexample.application.dto.response.TokenResponse;
+import com.senise.taskexample.application.dto.response.TokenResponseDTO;
 import com.senise.taskexample.application.dto.response.UserResponseDTO;
 import com.senise.taskexample.domain.usecase.auth.LoginUserUseCase;
 import com.senise.taskexample.domain.usecase.auth.RegisterUserUseCase;
@@ -56,7 +56,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "No autorizado - Credenciales inválidas")
     })
     @PostMapping(path = "/login")
-    public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<TokenResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
         return ResponseEntity.ok(loginUserUseCase.execute(loginRequest));
     }
 }

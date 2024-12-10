@@ -92,6 +92,7 @@ Se utiliza **H2** como base de datos en memoria en el entorno de desarrollo.
 |---------------|----------------|----------------------------------|
 | `id`          | `Long`         | ID único del rol.                |
 | `name`        | `String`       | Nombre del rol (por ejemplo, `ROLE_USER`, `ROLE_ADMIN`). |
+
 ---
 
 ## Swagger
@@ -136,5 +137,25 @@ La base de datos H2 es configurada automáticamente para usarse en modo en memor
 - JDBC URL: `jdbc:h2:mem:taskexample`
 - Usuario: `sa`
 - Contraseña: `password`
+
+---
+
+## Futuras Mejoras y Optimización
+
+Este proyecto es una **aplicación de ejemplo** y, aunque está funcional, hay muchas **mejoras y optimizaciones** que se realizarán en el futuro. Algunas de estas mejoras incluyen:
+
+1. **Migración a una base de datos más robusta**: Actualmente, la base de datos H2 se utiliza solo para el desarrollo y pruebas. En el futuro, se migrará a una base de datos más robusta como **PostgreSQL** o **MySQL** para entornos de producción.
+
+2. **Mejoras en el acceso por roles**: Aunque el acceso por roles ya está implementado, se planea **refinar** la lógica de autorización para mejorar la flexibilidad y la seguridad.
+
+3. **Optimización de la lógica de mapeo**: Actualmente, se utiliza mapeo manual entre los objetos DTO y las entidades. En el futuro, se podría integrar una librería como **MapStruct** para automatizar y optimizar este proceso, mejorando la mantenibilidad del código.
+
+4. **Ampliación de las excepciones personalizadas**: Se planea añadir más **excepciones personalizadas** para cubrir más casos de error, mejorando la claridad y manejo de fallos dentro de la API.
+
+5. **Mayor validación en los objetos de entrada**: Se mejorará la **validación de los objetos de entrada** (DTOs) para asegurar que los datos que se reciben sean correctos y completos, utilizando anotaciones de validación adicionales.
+
+6. **Mejoras en pruebas y cobertura**: Se planea ampliar las pruebas unitarias y de integración para asegurar una cobertura más completa del proyecto.
+
+7. **Optimización de la gestión de errores**: Se refinará la gestión de errores global en la aplicación, asegurando que los usuarios reciban mensajes claros y útiles en caso de fallos.
 
 ---

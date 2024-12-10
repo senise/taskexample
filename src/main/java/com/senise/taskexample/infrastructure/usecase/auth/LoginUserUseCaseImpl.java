@@ -1,7 +1,7 @@
 package com.senise.taskexample.infrastructure.usecase.auth;
 
-import com.senise.taskexample.application.dto.request.LoginRequest;
-import com.senise.taskexample.application.dto.response.TokenResponse;
+import com.senise.taskexample.application.dto.request.LoginRequestDTO;
+import com.senise.taskexample.application.dto.response.TokenResponseDTO;
 import com.senise.taskexample.domain.entity.User;
 import com.senise.taskexample.domain.usecase.auth.LoginUserUseCase;
 import com.senise.taskexample.infrastructure.configuration.security.JwtService;
@@ -21,7 +21,7 @@ public class LoginUserUseCaseImpl implements LoginUserUseCase {
     private final UserRepository userRepository;
 
     @Override
-    public TokenResponse execute(LoginRequest loginRequest) {
+    public TokenResponseDTO execute(LoginRequestDTO loginRequest) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
         );
@@ -29,6 +29,6 @@ public class LoginUserUseCaseImpl implements LoginUserUseCase {
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
 
-        return new TokenResponse(jwtService.generateToken(user), user.getId());
+        return new TokenResponseDTO(jwtService.generateToken(user), user.getId());
     }
 }

@@ -1,8 +1,8 @@
 package com.senise.taskexample.domain.usecase.auth;
 
-import com.senise.taskexample.application.dto.request.LoginRequest;
-import com.senise.taskexample.application.dto.response.TokenResponse;
+import com.senise.taskexample.application.dto.request.LoginRequestDTO;
+import com.senise.taskexample.application.dto.response.TokenResponseDTO;
 
 public interface LoginUserUseCase {
-    TokenResponse execute(LoginRequest loginRequest);
+    TokenResponseDTO execute(LoginRequestDTO loginRequest);
 }
