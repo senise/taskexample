@@ -1,5 +1,6 @@
 package com.senise.taskexample.application.exception;
 
+import com.senise.taskexample.application.dto.response.ErrorResponseDTO;
 import com.senise.taskexample.domain.exception.TaskNotFoundException;
 import com.senise.taskexample.domain.exception.UserNotAuthorizedException;
 import com.senise.taskexample.domain.exception.UserNotFoundException;
@@ -15,48 +16,57 @@ public class GlobalExceptionHandler {
 
     // Manejar UserNotFoundException
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<ErrorResponseDTO> handleUserNotFound(UserNotFoundException ex) {
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(ex.getMessage(),HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.NOT_FOUND);
     }
 
     // Manejar TaskNotFoundException
     @ExceptionHandler(TaskNotFoundException.class)
-    public ResponseEntity<String> handleTaskNotFound(TaskNotFoundException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<ErrorResponseDTO> handleTaskNotFound(TaskNotFoundException ex) {
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(ex.getMessage(),HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.NOT_FOUND);
     }
 
     // Manejador de violaciones de integridad de datos
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         // Analizar el mensaje de la excepción para identificar el campo violado
         String message = ex.getMessage().toLowerCase();
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(ex.getMessage(),HttpStatus.NOT_FOUND.value());
 
         if (message.contains("email")) {
-            return new ResponseEntity<>("El correo electrónico ya está registrado.", HttpStatus.BAD_REQUEST);
+            errorResponseDTO.setMessage("El correo electrónico ya está registrado.");
         } else if (message.contains("id")) {
-            return new ResponseEntity<>("El ID ya está en uso.", HttpStatus.BAD_REQUEST);
+            errorResponseDTO.setMessage("El ID ya está en uso.");
         } else {
-            return new ResponseEntity<>("Violación de restricción de integridad.", HttpStatus.BAD_REQUEST);
+            errorResponseDTO.setMessage("Violación de restricción de integridad.");
         }
+
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+
     }
 
     @ExceptionHandler(UserNotAuthorizedException.class)
-    public ResponseEntity<String> handleUserNotAuthorizedException(UserNotAuthorizedException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN); // Respondemos con código 403 y el mensaje de la excepción
+    public ResponseEntity<ErrorResponseDTO> handleUserNotAuthorizedException(UserNotAuthorizedException ex) {
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(ex.getMessage(),HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.FORBIDDEN); // Respondemos con código 403 y el mensaje de la excepción
     }
 
     // Manejar cualquier otra excepción
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGlobalException(Exception ex) {
-        return new ResponseEntity<>("Ocurrió un error inesperado: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ErrorResponseDTO> handleGlobalException(Exception ex) {
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO("Ocurrió un error inesperado: " + ex.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
      * Maneja excepciones de acceso denegado (por roles insuficientes).
      */
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException ex) {
-        String errorMessage = "Acceso denegado. No tienes permisos suficientes para acceder a este recurso.";
-        return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);  // 403 Forbidden
+    public ResponseEntity<ErrorResponseDTO> handleAccessDeniedException(AccessDeniedException ex) {
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO("Acceso denegado. No tienes permisos suficientes para acceder a este recurso.",HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.FORBIDDEN);  // 403 Forbidden
     }
 }
