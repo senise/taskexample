@@ -13,14 +13,20 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
-    private final RegisterUserUseCase registerUserUseCase;  // Uso de la interfaz
-    private final LoginUserUseCase loginUserUseCase;        // Uso de la interfaz
+    private final RegisterUserUseCase registerUserUseCase;
+    private final LoginUserUseCase loginUserUseCase;
 
+    /**
+     * Registrar usuario.
+     */
     @Override
     public UserResponseDTO register(UserRequestDTO userRequestDTO) {
         return registerUserUseCase.execute(userRequestDTO);
     }
 
+    /**
+     * Login de usuario
+     */
     @Override
     public TokenResponse login(LoginRequest loginRequest) {
         return loginUserUseCase.execute(loginRequest);

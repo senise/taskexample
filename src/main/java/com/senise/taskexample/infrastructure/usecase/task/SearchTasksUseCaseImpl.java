@@ -28,7 +28,7 @@ public class SearchTasksUseCaseImpl implements SearchTasksUseCase {
         String userEmail = authentication.getName(); // Se asume que el nombre del usuario es el correo electrónico
 
         // Comprobar si el usuario tiene rol ADMIN
-        boolean isAdmin = securityService.isAdmin(authentication); // Usar el método isAdmin del SecurityService
+        boolean isAdmin = securityService.isAdmin(authentication);
 
         Specification<Task> spec = Specification.where(null);
 
@@ -36,7 +36,7 @@ public class SearchTasksUseCaseImpl implements SearchTasksUseCase {
             // Si es USER, filtrar solo las tareas asociadas al usuario con el correo electrónico
             // Usar canAccessResource para verificar si el usuario tiene acceso
             spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("user").get("email"), userEmail)); // Asumir que tienes un campo 'user' en Task
+                    criteriaBuilder.equal(root.get("user").get("email"), userEmail));
 
         }
 
