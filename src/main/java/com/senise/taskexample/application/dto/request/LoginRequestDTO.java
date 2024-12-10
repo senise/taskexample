@@ -15,10 +15,10 @@ import lombok.NoArgsConstructor;
 public class LoginRequestDTO {
 
     @Schema(description = "Correo electrónico del usuario", example = "juan.perez@example.com", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
+    @NotBlank(message = "El correo es obligatorio")
     private String email;
 
     @Schema(description = "Contraseña del usuario", example = "Abc1234.", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
+    @NotBlank(message = "La contraseña es obligatoria")
     private String password;
 }

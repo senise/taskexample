@@ -14,19 +14,19 @@ import lombok.NoArgsConstructor;
 public class UserRequestDTO {
 
     @Schema(description = "Nombre del usuario", example = "Juan Pérez", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
+    @NotBlank(message = "El nombre de usuario es obligatorio")
     private String name;
 
     @Schema(description = "Correo electrónico del usuario", example = "juan.perez@example.com", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
-    @Email
+    @NotBlank(message = "El email es obligatorio")
+    @Email(message = "El formato del campo debe ser el de un email")
     private String email;
 
     @Schema(description = "Contraseña del usuario", example = "Abc1234.", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
+    @NotBlank(message = "La contraseña es obligatoria")
     private String password;
 
     @Schema(description = "Rol del usuario", example = "ROLE_USER", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
+    @NotBlank(message = "El rol de usuario es obligatorio")
     private String role;
 }

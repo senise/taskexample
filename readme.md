@@ -152,7 +152,8 @@ La base de datos H2 es configurada automáticamente para usarse en modo en memor
 
 Este proyecto es una **aplicación de ejemplo** y, aunque está funcional, hay muchas **mejoras y optimizaciones** que se realizarán en el futuro. Algunas de estas mejoras incluyen:
 
-1. **Ajuste de propiedades para otros entornos:** Ya que ahora esta preparado para poder ver trazas y realizar pruebas.
+1. **Ajuste de propiedades para otros entornos:** Ya que ahora esta preparado para poder ver trazas y realizar pruebas y
+   no se tiene en cuenta las propiedades como si fuera a ser desplegado en producción por ejemplo.
 2. **Migración a una base de datos más robusta**: Actualmente, la base de datos H2 se utiliza solo para el desarrollo y
    pruebas. En el futuro, se migrará a una base de datos más robusta como **PostgreSQL** o **MySQL** para entornos de
    producción.

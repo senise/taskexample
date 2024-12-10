@@ -14,18 +14,18 @@ import lombok.NoArgsConstructor;
 public class TaskRequestDTO {
 
     @Schema(description = "Título de la tarea", example = "Comprar leche", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
+    @NotBlank(message = "El título de la tarea es obligatorio")
     private String title;
 
     @Schema(description = "Descripción detallada de la tarea", example = "Ir al supermercado a comprar leche", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
+    @NotBlank(message = "La descripción de la tarea es obligatoria")
     private String description;
 
     @Schema(description = "Indica si la tarea está completada", example = "false")
     private boolean completed;
 
     @Schema(description = "ID del usuario asociado a la tarea", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull
+    @NotNull(message = "El id de usuario no puede ser nulo")
     private Long userId;
 }
 
