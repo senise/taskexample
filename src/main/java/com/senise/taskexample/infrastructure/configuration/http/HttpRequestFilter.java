@@ -26,7 +26,7 @@ public class HttpRequestFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
-        log.info("Request: {} {}", httpRequest.getMethod(), httpRequest.getRequestURI());
+        log.debug("Request: {} {}", httpRequest.getMethod(), httpRequest.getRequestURI());
         chain.doFilter(request, response);
     }
 }
