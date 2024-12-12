@@ -82,7 +82,7 @@ Se utiliza **H2** como base de datos en memoria en el entorno de desarrollo.
 | `name`        | `String`       | Nombre completo del usuario.     |
 | `email`       | `String`       | Correo electrónico del usuario.  |
 | `password`    | `String`       | Contraseña del usuario.          |
-| `role`        | `String`       | Rol del usuario (Admin/User).    |
+| `role_id`     | `Long`         | Id del Rol del usuario.          |
 | `createdAt`   | `LocalDateTime`| Fecha de creación del usuario.   |
 
 #### **Tasks**
